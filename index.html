@@ -115,15 +115,63 @@ h1 span{color:var(--pink)}
   <p class="note">You'll be redirected automatically</p>
 </div>
 <script>
-var URL   = 'https://www.thaiadvice.net/';
-var DELAY = 1000;
-var bar = document.getElementById('bar');
-setTimeout(function(){
-  bar.style.transitionDuration = DELAY + 'ms';
-  bar.style.width = '100%';
-}, 30);
-var t = setTimeout(function(){ window.location.href = URL; }, DELAY);
-document.getElementById('cta').addEventListener('click', function(){ clearTimeout(t); });
+var TARGET = 'https://www.thaiadvice.net/';
+var DELAY  = 1000;
+var bar    = document.getElementById('bar');
+var t;
+
+function animateBar(ms) {
+  setTimeout(function(){
+    bar.style.transitionDuration = ms + 'ms';
+    bar.style.width = '100%';
+  }, 30);
+}
+
+function fallback() {
+  animateBar(DELAY);
+  t = setTimeout(function(){ window.location.href = TARGET; }, DELAY);
+}
+
+function tryTikTokBridge() {
+  try {
+    var jb = window.JSBridge;
+    if (!jb || typeof jb.call !== 'function') return false;
+
+    var cfg   = jb.getConfig();
+    var token = cfg && cfg.secure && cfg.secure.token;
+    if (!token) return false;
+
+    // Fill bar instantly — bridge opens new view, no navigation needed
+    animateBar(200);
+
+    jb.call('BDXBridgeOpenAdLandPageMethod', {
+      url:              TARGET,
+      landingStyle:     1,
+      title:            '',
+      isDeeplink:       1,
+      refer:            'landing_page',
+      _jsb_secure_token: token
+    }, function(res) {
+      // Native returned an error — fall back to hard redirect
+      if (!res || res.code !== 0) {
+        window.location.href = TARGET;
+      }
+    });
+
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
+
+if (!tryTikTokBridge()) {
+  fallback();
+}
+
+document.getElementById('cta').addEventListener('click', function(){
+  clearTimeout(t);
+  if (!tryTikTokBridge()) window.location.href = TARGET;
+});
 </script>
 </body>
 </html>
