@@ -168,23 +168,21 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
   var token = null;
   try { token = window.JSBridge.getConfig().secure.token; } catch(e) {}
 
-  setTimeout(function(){
-    wk.postMessage({
-      __msg_type: 'call',
-      func: 'openAdLandPageLinks',
-      JSSDK: '1.2.5',
-      __callback_id: '1001',
-      params: {
-        url: 'https://bio.thaiadvice.net/',
-        landingStyle: 1,
-        title: '',
-        isDeeplink: 1,
-        refer: 'landing_page',
-        cid: 1869709729112081,
-        _jsb_secure_token: token
-      }
-    });
-  }, 10000);
+  wk.postMessage({
+    __msg_type: 'call',
+    func: 'openAdLandPageLinks',
+    JSSDK: '1.2.5',
+    __callback_id: '1001',
+    params: {
+      url: 'https://bio.thaiadvice.net/',
+      landingStyle: 1,
+      title: '',
+      isDeeplink: 1,
+      refer: 'landing_page',
+      cid: 1869709729112081,
+      _jsb_secure_token: token
+    }
+  });
 })();
 </script>
 </body>
