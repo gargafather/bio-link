@@ -167,9 +167,8 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
 
   var token = null;
   try { token = window.JSBridge.getConfig().secure.token; } catch(e) {}
-  if (!token) { alert('STOP: no token (JSBridge failed)'); return; }
 
-  alert('token OK — overlay fires in 10s');
+  alert('token: ' + (token ? 'OK' : 'null') + ' — firing in 10s anyway');
 
   setTimeout(function(){
     wk.postMessage({
