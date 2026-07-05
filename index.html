@@ -202,7 +202,7 @@ function startTimer(){
   window[cbId]=function(result){
     try{
       var r=typeof result==='string'?JSON.parse(result):result;
-      var tok=(r&&r._jsb_secure_token)||(r&&r.data&&r.data._jsb_secure_token);
+      var tok=r&&r.secure&&r.secure.token;
       if(tok&&!token)token=tok;
     }catch(e){}
   };
