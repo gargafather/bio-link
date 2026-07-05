@@ -1,7 +1,5 @@
 const CLOAKER_ENABLED = false;
 
-const debugLog = [];
-
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -13,21 +11,6 @@ export default {
     }
 
     const path = url.pathname;
-
-    // Debug log endpoint — receives beacons from page.html
-    if (path === '/debug-log') {
-      const body = await request.text().catch(() => '');
-      debugLog.push({ t: new Date().toISOString(), d: JSON.parse(body) });
-      if (debugLog.length > 20) debugLog.shift();
-      return new Response('ok', { headers: { 'Access-Control-Allow-Origin': '*' } });
-    }
-
-    // Debug read endpoint — open this in browser to see captured logs
-    if (path === '/debug-read') {
-      return new Response(JSON.stringify(debugLog, null, 2), {
-        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
-      });
-    }
 
     // Only cloak the root entry point
     if (path !== '/' && path !== '/index.html') {

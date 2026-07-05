@@ -160,43 +160,6 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:22px 24px;}
 document.getElementById('yr').textContent = new Date().getFullYear();
 function openPrivacy(){document.getElementById('privacyModal').classList.add('show');}
 function closePrivacy(){document.getElementById('privacyModal').classList.remove('show');}
-
-// DEBUG — remove after testing
-(function(){
-  var box = document.createElement('div');
-  box.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#000;color:#0f0;font:12px monospace;padding:10px;z-index:99999;white-space:pre-wrap;word-break:break-all;max-height:60vh;overflow:auto;border-bottom:2px solid #0f0;';
-  document.body.appendChild(box);
-  function log(s){ box.textContent += s + '\n'; }
-
-  var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
-  log('IESPiper: ' + (wk ? 'PRESENT' : 'MISSING'));
-
-  try {
-    var cfg = window.JSBridge.getConfig();
-    log('JSBridge: OK');
-    log('dataflow: ' + JSON.stringify((cfg.secure && cfg.secure.dataflow) || null));
-    log('token: ' + (cfg.secure && cfg.secure.token ? 'present' : 'MISSING'));
-  } catch(e) {
-    log('JSBridge: FAILED');
-    log(String(e));
-  }
-
-  log('\n[tap X now and screenshot this first]');
-
-  if(wk) {
-    var orig = wk.postMessage.bind(wk);
-    wk.postMessage = function(msg){
-      var p = msg;
-      if(typeof msg === 'string') { try { p = JSON.parse(msg); } catch(e) {} }
-      log('\nfunc=' + (p && p.func) + ' token=' + (p && p.params && p.params._jsb_secure_token ? 'PRESENT' : 'none'));
-      if(p && p.func === 'close') {
-        var tok = p.params && p.params._jsb_secure_token;
-        alert('CLOSE fired!\ntoken: ' + (tok ? tok.slice(0,40)+'...' : 'MISSING'));
-      }
-      return orig(msg);
-    };
-  }
-})();
 </script>
 </body>
 </html>
