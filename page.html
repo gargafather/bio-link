@@ -209,24 +209,45 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
     });
   }
 
-  function inspectBridge(name) {
-    var obj = window[name];
-    if (!obj) return;
+  // Intercept eval — native likely delivers IESPiper callbacks via evaluateJavaScript
+  var _origEval = window.eval;
+  window.eval = function(s) {
+    log('eval: '+String(s).substring(0,200));
+    return _origEval.call(window, s);
+  };
+
+  // Set up candidate callback function names native might call
+  var cbNames = ['mycb_getconfig','_ies_cb_1001','piper_cb_1001','JSSDK_callback_1001'];
+  cbNames.forEach(function(n){
+    window[n] = function(){ log(n+' called: '+JSON.stringify([].slice.call(arguments)).substring(0,200)); };
+  });
+
+  // Log all JS2NativeBridge methods
+  try {
+    log('JS2NativeBridge keys: '+Object.getOwnPropertyNames(b).join(','));
+  } catch(e){}
+
+  // Call getConfig via IESPiper with callback id
+  var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
+  if (wk) {
+    log('calling getConfig via IESPiper');
     try {
-      var keys = Object.getOwnPropertyNames(obj).concat(Object.getOwnPropertyNames(Object.getPrototypeOf(obj)||{}));
-      log(name+' keys: '+keys.join(','));
-    } catch(e){ log(name+' inspect err: '+e); }
-    log(name+'._handleMessageFromToutiao: '+(typeof obj._handleMessageFromToutiao));
-    log(name+'._handleMessageFromApp: '+(typeof obj._handleMessageFromApp));
+      wk.postMessage({
+        __msg_type: 'call', func: 'getConfig', JSSDK: '1.2.5', __callback_id: 'mycb_getconfig',
+        params: {}
+      });
+    } catch(e){ log('piper getConfig err: '+e); }
   }
 
-  ['ToutiaoJSBridge','JSBridge','JS2NativeBridge','Native2JSBridge'].forEach(function(n){ if(window[n]) inspectBridge(n); });
+  // Also prime via JS2NativeBridge
+  log('prime via JS2NativeBridge._invokeMethod');
+  try { var r = b._invokeMethod(JSON.stringify({func:'getConfig',params:{}})); log('invokeRet: '+JSON.stringify(r)); } catch(e){ log('prime err: '+e); }
 
+  // Hook bridge objects for _handleMessageFromToutiao
   setTimeout(function(){
-    ['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n){ if(window[n]){ inspectBridge(n); hookBridge(window[n]); } });
-    log('prime getConfig');
-    try { b._invokeMethod(JSON.stringify({func:'getConfig',params:{}})); } catch(e){ log('prime err: '+e); }
-  }, 1200);
+    ['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n){ if(window[n]) hookBridge(window[n]); });
+    log('rehook @1s, msgCount='+msgCount);
+  }, 1000);
 
   setTimeout(function(){
     log('3s: msgCount='+msgCount+' token='+(token?'yes':'no'));
