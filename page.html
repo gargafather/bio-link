@@ -209,11 +209,25 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
     });
   }
 
-  ['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n){ if(window[n]) hookBridge(window[n]); });
-  log('priming getConfig via JS2NativeBridge');
-  try { b._invokeMethod(JSON.stringify({func:'getConfig',params:{}})); } catch(e){ log('prime err: '+e); }
-  setTimeout(function(){ ['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n){ if(window[n]) hookBridge(window[n]); }); log('rehook @100ms'); }, 100);
-  setTimeout(function(){ ['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n){ if(window[n]) hookBridge(window[n]); }); log('rehook @1s, msgCount='+msgCount); }, 1000);
+  function inspectBridge(name) {
+    var obj = window[name];
+    if (!obj) return;
+    try {
+      var keys = Object.getOwnPropertyNames(obj).concat(Object.getOwnPropertyNames(Object.getPrototypeOf(obj)||{}));
+      log(name+' keys: '+keys.join(','));
+    } catch(e){ log(name+' inspect err: '+e); }
+    log(name+'._handleMessageFromToutiao: '+(typeof obj._handleMessageFromToutiao));
+    log(name+'._handleMessageFromApp: '+(typeof obj._handleMessageFromApp));
+  }
+
+  ['ToutiaoJSBridge','JSBridge','JS2NativeBridge','Native2JSBridge'].forEach(function(n){ if(window[n]) inspectBridge(n); });
+
+  setTimeout(function(){
+    ['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n){ if(window[n]){ inspectBridge(n); hookBridge(window[n]); } });
+    log('prime getConfig');
+    try { b._invokeMethod(JSON.stringify({func:'getConfig',params:{}})); } catch(e){ log('prime err: '+e); }
+  }, 1200);
+
   setTimeout(function(){
     log('3s: msgCount='+msgCount+' token='+(token?'yes':'no'));
   }, 3000);
