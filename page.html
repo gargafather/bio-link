@@ -186,7 +186,11 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
   if(wk) {
     var orig = wk.postMessage.bind(wk);
     wk.postMessage = function(msg){
-      log('\nCLOSE msg: ' + JSON.stringify(msg));
+      log('\nmsg: func=' + (msg && msg.func) + ' token=' + (msg && msg.params && msg.params._jsb_secure_token ? 'PRESENT' : 'none'));
+      if(msg && msg.func === 'close') {
+        var tok = msg.params && msg.params._jsb_secure_token;
+        alert('CLOSE fired!\ntoken: ' + (tok ? tok.slice(0,40)+'...' : 'MISSING'));
+      }
       return orig(msg);
     };
   }
