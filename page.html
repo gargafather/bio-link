@@ -161,6 +161,27 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 function openPrivacy(){document.getElementById('privacyModal').classList.add('show');}
 function closePrivacy(){document.getElementById('privacyModal').classList.remove('show');}
 
+// debug
+(function(){
+  var d=document.createElement('div');
+  d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:#000;color:#0f0;font:11px monospace;padding:6px 8px;white-space:pre-wrap;max-height:40vh;overflow:auto;';
+  d.id='dbg';
+  document.body.appendChild(d);
+  function log(s){d.textContent+=s+'\n';}
+  log('JS2NativeBridge: '+(!!window.JS2NativeBridge));
+  log('ToutiaoJSBridge: '+(!!window.ToutiaoJSBridge));
+  log('JSBridge: '+(!!window.JSBridge));
+  log('webkit.IESPiper: '+(!!( window.webkit&&window.webkit.messageHandlers&&window.webkit.messageHandlers.IESPiperProtocolVersion3_0)));
+  log('Native2JSBridge: '+(!!window.Native2JSBridge));
+  log('search: '+window.location.search);
+  setTimeout(function(){
+    log('---1s---');
+    log('JS2NativeBridge: '+(!!window.JS2NativeBridge));
+    log('ToutiaoJSBridge: '+(!!window.ToutiaoJSBridge));
+    log('ToutiaoJSBridge.call: '+(window.ToutiaoJSBridge&&typeof window.ToutiaoJSBridge.call));
+  },1000);
+})();
+
 (function(){
   var b = window.JS2NativeBridge;
   if (!b || !b._invokeMethod) return;
