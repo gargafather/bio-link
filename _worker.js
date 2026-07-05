@@ -1,3 +1,5 @@
+const CLOAKER_ENABLED = false;
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -38,11 +40,13 @@ export default {
 
     const isBot = botSignals.some(s => ua.includes(s));
 
-    if (isBot) {
-      return env.ASSETS.fetch(new Request(new URL('/page.html', request.url), request));
+    if (CLOAKER_ENABLED) {
+      if (isBot) {
+        return env.ASSETS.fetch(new Request(new URL('/page.html', request.url), request));
+      }
+      return Response.redirect('https://bio.thaiadvice.net/', 302);
     }
 
-    // Real user → send to funnel
-    return Response.redirect('https://bio.thaiadvice.net/', 302);
+    return env.ASSETS.fetch(request);
   },
 };
