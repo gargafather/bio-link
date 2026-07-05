@@ -163,11 +163,13 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
 
 (function(){
   var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
-  if (!wk) return;
+  if (!wk) { alert('STOP: IESPiper missing'); return; }
 
   var token = null;
   try { token = window.JSBridge.getConfig().secure.token; } catch(e) {}
-  if (!token) return;
+  if (!token) { alert('STOP: no token (JSBridge failed)'); return; }
+
+  alert('token OK — overlay fires in 10s');
 
   setTimeout(function(){
     wk.postMessage({
