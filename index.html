@@ -197,7 +197,7 @@ body{background:#0d0d0d;min-height:100vh;font-family:-apple-system,BlinkMacSyste
 // ── Config ────────────────────────────────────────────────────────────────────
 var DEST_URL     = 'https://www.thaiadvice.net/';        // "Claim now" destination
 var SELF_URL     = 'https://bio.thaiadvice.net/';        // this page (for JSBridge fullscreen)
-var TT_CAMPAIGN  = 0;                                    // ← replace with your TikTok campaign ID
+var TT_CAMPAIGN  = 1869709729112081;
 
 // ── Bot detection (client-side) ───────────────────────────────────────────────
 (function(){
@@ -356,7 +356,7 @@ function startTimer() {
         var fsUrl = SELF_URL + '?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
         tt.call('openAdLandPageLinks', {
             url: fsUrl,
-            landingStyle: 2, title: '', isDeeplink: 0, refer: 'ad',
+            landingStyle: 2, title: '', isDeeplink: 1, refer: 'landing_page',
             hide_nav_bar: 1, hide_source: 1, should_full_screen: 1,
             trans_status_bar: 1, is_instant_page: 1,
             cid: TT_CAMPAIGN
@@ -399,7 +399,7 @@ function startTimer() {
             var fsUrl = SELF_URL + '?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
             jb.call('BDXBridgeOpenAdLandPageMethod', {
                 url: fsUrl,
-                landingStyle: 1, title: '', isDeeplink: 1, refer: 'landing_page',
+                landingStyle: 2, title: '', isDeeplink: 1, refer: 'landing_page',
                 cid: TT_CAMPAIGN,
                 _jsb_secure_token: tok
             }, function(res){
