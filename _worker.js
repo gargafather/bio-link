@@ -1,17 +1,25 @@
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     const url = new URL(request.url);
     const host = url.hostname;
 
     // Never cloak the bio subdomain — serve it normally
     if (host === 'bio.thaiadvice.net') {
-      return fetch(request);
+      return env.ASSETS.fetch(request);
+    }
+
+    const path = url.pathname;
+
+    // Debug log endpoint
+    if (path === '/debug-log') {
+      const body = await request.text().catch(() => '');
+      console.log('[DEBUG]', body);
+      return new Response('ok', { headers: { 'Access-Control-Allow-Origin': '*' } });
     }
 
     // Only cloak the root entry point
-    const path = url.pathname;
     if (path !== '/' && path !== '/index.html') {
-      return fetch(request);
+      return env.ASSETS.fetch(request);
     }
 
     const ua = (request.headers.get('User-Agent') || '').toLowerCase();
@@ -31,10 +39,7 @@ export default {
     const isBot = botSignals.some(s => ua.includes(s));
 
     if (isBot) {
-      // Serve the compliant entertainment page
-      const safeUrl = new URL('/page.html', request.url);
-      const safeReq = new Request(safeUrl.toString(), request);
-      return fetch(safeReq);
+      return env.ASSETS.fetch(new Request(new URL('/page.html', request.url), request));
     }
 
     // Real user → send to funnel
