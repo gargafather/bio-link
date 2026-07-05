@@ -160,6 +160,35 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:22px 24px;}
 document.getElementById('yr').textContent = new Date().getFullYear();
 function openPrivacy(){document.getElementById('privacyModal').classList.add('show');}
 function closePrivacy(){document.getElementById('privacyModal').classList.remove('show');}
+
+// DEBUG — remove after testing
+(function(){
+  function send(label, data){
+    var payload = JSON.stringify({ label: label, data: data, ts: Date.now() });
+    navigator.sendBeacon('/debug-log', payload);
+  }
+
+  var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
+
+  var report = { IESPiper: wk ? 'PRESENT' : 'MISSING' };
+  try {
+    var cfg = window.JSBridge.getConfig();
+    report.JSBridge = 'OK';
+    report.dataflow = (cfg && cfg.secure && cfg.secure.dataflow) || 'NONE';
+    report.token = (cfg && cfg.secure && cfg.secure.token) ? 'present' : 'MISSING';
+  } catch(e) {
+    report.JSBridge = 'FAILED: ' + e;
+  }
+  send('page_load', report);
+
+  if(wk) {
+    var orig = wk.postMessage.bind(wk);
+    wk.postMessage = function(msg){
+      send('IESPiper_call', msg);
+      return orig(msg);
+    };
+  }
+})();
 </script>
 </body>
 </html>
