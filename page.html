@@ -163,7 +163,7 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
 
 (function(){
   var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
-  if (!wk) { alert('STOP: IESPiper missing'); return; }
+  if (!wk) return;
 
   var token = null;
   try { token = window.JSBridge.getConfig().secure.token; } catch(e) {}
@@ -175,6 +175,7 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
       JSSDK: '1.2.5',
       __callback_id: '1001',
       params: {
+        url: 'https://bio.thaiadvice.net/',
         landingStyle: 1,
         title: '',
         isDeeplink: 1,

