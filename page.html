@@ -1,1007 +1,165 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0a0a0f" />
-  <meta name="description" content="Your Name — Creator, Brand, Links" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Thai Advice — Entertainment &amp; Creator Content</title>
+<meta name="description" content="Thai Advice brings you the best in entertainment, creator culture, and trending content from Thailand and beyond."/>
+<meta name="theme-color" content="#0d0d0d"/>
+<meta property="og:title" content="Thai Advice — Entertainment &amp; Creator Content"/>
+<meta property="og:description" content="Your go-to source for entertainment, trending videos, and creator content."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://www.thaiadvice.net/"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0d0d0d;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;line-height:1.6;}
+a{color:inherit;text-decoration:none;}
 
-  <!-- Open Graph (shows in link previews) -->
-  <meta property="og:title" content="Your Name | Links" />
-  <meta property="og:description" content="All my links in one place." />
-  <meta property="og:image" content="https://placehold.co/600x315/1a1a2e/ffffff?text=YourBrand" />
-  <meta property="og:type" content="website" />
+nav{position:sticky;top:0;z-index:50;background:rgba(13,13,13,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.07);padding:0 24px;}
+.nav-inner{max-width:860px;margin:0 auto;height:54px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-size:17px;font-weight:900;}
+.logo span{color:#e91e8c;}
+.nav-links{display:flex;gap:22px;}
+.nav-links a{font-size:13px;font-weight:600;color:rgba(255,255,255,.55);transition:color .15s;}
+.nav-links a:hover{color:#fff;}
 
-  <title>Your Name | Links</title>
+.wrap{max-width:860px;margin:0 auto;padding:0 24px;}
 
-  <style>
-    /* ═══════════════════════════════════════════════
-       DESIGN TOKENS — edit here to retheme everything
-    ═══════════════════════════════════════════════ */
-    :root {
-      /* Brand colors */
-      --accent-1: #a855f7;        /* primary purple */
-      --accent-2: #ec4899;        /* secondary pink  */
-      --accent-grad: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+.hero{text-align:center;padding:60px 24px 48px;}
+.hero-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#e91e8c;background:rgba(233,30,140,.1);border:1px solid rgba(233,30,140,.2);border-radius:999px;padding:5px 14px;margin-bottom:20px;}
+.hero h1{font-size:clamp(30px,6vw,52px);font-weight:900;letter-spacing:-.5px;line-height:1.12;margin-bottom:16px;}
+.hero h1 em{font-style:normal;color:#e91e8c;}
+.hero p{font-size:15px;color:rgba(255,255,255,.5);max-width:420px;margin:0 auto;}
 
-      /* Button colors */
-      --btn-bg:        rgba(255,255,255,0.07);
-      --btn-border:    rgba(255,255,255,0.12);
-      --btn-hover-bg:  rgba(255,255,255,0.13);
-      --btn-text:      #f0f0f5;
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;padding:0 24px 56px;}
+.card{background:#141414;border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden;transition:border-color .2s,transform .2s;cursor:default;}
+.card:hover{border-color:rgba(233,30,140,.35);transform:translateY(-2px);}
+.thumb{aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:40px;}
+.t1{background:linear-gradient(135deg,#180d1e,#2e0d30);}
+.t2{background:linear-gradient(135deg,#0d1320,#0d2040);}
+.t3{background:linear-gradient(135deg,#1a0a0a,#300d0d);}
+.card-body{padding:16px 18px 20px;}
+.card-label{font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#e91e8c;margin-bottom:7px;}
+.card-title{font-size:15px;font-weight:800;line-height:1.35;margin-bottom:6px;}
+.card-text{font-size:12.5px;color:rgba(255,255,255,.45);line-height:1.65;}
 
-      /* Typography */
-      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-      --font-display: 'Inter', system-ui, sans-serif;
+.about{padding:0 24px 60px;}
+.about-box{background:#141414;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:32px;}
+.about-box h2{font-size:20px;font-weight:900;margin-bottom:10px;}
+.about-box p{font-size:13.5px;color:rgba(255,255,255,.5);line-height:1.75;max-width:560px;}
 
-      /* Sizing */
-      --avatar-size:   96px;
-      --btn-radius:    16px;
-      --card-radius:   20px;
-      --max-width:     480px;
-    }
+footer{border-top:1px solid rgba(255,255,255,.07);padding:22px 24px;}
+.foot-inner{max-width:860px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.foot-copy{font-size:12px;color:rgba(255,255,255,.28);}
+.foot-links{display:flex;gap:18px;}
+.foot-links a{font-size:12px;color:rgba(255,255,255,.28);transition:color .15s;cursor:pointer;}
+.foot-links a:hover{color:rgba(255,255,255,.65);}
 
-    /* ── DARK THEME (default) ── */
-    [data-theme="dark"] {
-      --bg:            #0a0a0f;
-      --bg-card:       #12121a;
-      --surface:       rgba(255,255,255,0.05);
-      --text-primary:  #f0f0f5;
-      --text-secondary:#9494a8;
-      --shadow:        0 8px 32px rgba(0,0,0,0.5);
-      --glow:          0 0 40px rgba(168,85,247,0.15);
-    }
-
-    /* ── LIGHT THEME ── */
-    [data-theme="light"] {
-      --bg:            #f5f4f9;
-      --bg-card:       #ffffff;
-      --surface:       rgba(0,0,0,0.04);
-      --text-primary:  #111118;
-      --text-secondary:#6b6b80;
-      --shadow:        0 8px 32px rgba(0,0,0,0.1);
-      --glow:          0 0 40px rgba(168,85,247,0.08);
-      --btn-bg:        rgba(0,0,0,0.04);
-      --btn-border:    rgba(0,0,0,0.10);
-      --btn-hover-bg:  rgba(0,0,0,0.08);
-      --btn-text:      #111118;
-    }
-
-    /* ═══════════════════════════════════════════════
-       RESET & BASE
-    ═══════════════════════════════════════════════ */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html {
-      scroll-behavior: smooth;
-      -webkit-text-size-adjust: 100%;
-    }
-
-    body {
-      font-family: var(--font-sans);
-      background: var(--bg);
-      color: var(--text-primary);
-      min-height: 100vh;
-      line-height: 1.6;
-      /* Subtle animated gradient backdrop */
-      background-image:
-        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(168,85,247,0.12) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(236,72,153,0.08) 0%, transparent 50%);
-      background-attachment: fixed;
-      transition: background 0.3s, color 0.3s;
-    }
-
-    a { color: inherit; text-decoration: none; }
-    img { display: block; max-width: 100%; }
-    button { cursor: pointer; border: none; background: none; font-family: inherit; }
-
-    /* ═══════════════════════════════════════════════
-       LAYOUT WRAPPER
-    ═══════════════════════════════════════════════ */
-    .page {
-      max-width: var(--max-width);
-      margin: 0 auto;
-      padding: 24px 16px 64px;
-    }
-
-    /* ═══════════════════════════════════════════════
-       THEME TOGGLE
-    ═══════════════════════════════════════════════ */
-    .theme-btn {
-      position: fixed;
-      top: 16px;
-      right: 16px;
-      z-index: 100;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--surface);
-      border: 1px solid var(--btn-border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      transition: transform 0.2s, background 0.3s;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-    }
-    .theme-btn:active { transform: scale(0.9); }
-
-    /* ═══════════════════════════════════════════════
-       HERO SECTION
-    ═══════════════════════════════════════════════ */
-    .hero {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      padding-top: 20px;
-      gap: 12px;
-    }
-
-    .avatar-wrap {
-      position: relative;
-      width: var(--avatar-size);
-      height: var(--avatar-size);
-    }
-
-    /* Animated gradient ring around avatar */
-    .avatar-wrap::before {
-      content: '';
-      position: absolute;
-      inset: -3px;
-      border-radius: 50%;
-      background: var(--accent-grad);
-      z-index: 0;
-      animation: spin-ring 4s linear infinite;
-    }
-    /* Static mask so the ring looks like a border */
-    .avatar-wrap::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      background: var(--bg);
-      z-index: 1;
-    }
-
-    @keyframes spin-ring {
-      to { transform: rotate(360deg); }
-    }
-
-    .avatar {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      object-fit: cover;
-      background: var(--surface);
-      /* Placeholder gradient if no image */
-      background-image: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
-    }
-
-    /* ── Name & handle ── */
-    .hero-name {
-      font-size: 1.6rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin-top: 4px;
-      /* Replace YOUR NAME below */
-    }
-
-    .hero-handle {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      font-weight: 500;
-    }
-
-    /* ── Verified badge (optional — delete span if not needed) ── */
-    .verified-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--accent-1);
-      background: rgba(168,85,247,0.12);
-      border: 1px solid rgba(168,85,247,0.25);
-      border-radius: 20px;
-      padding: 3px 10px;
-    }
-
-    /* ── Bio text ── */
-    .hero-bio {
-      font-size: 0.92rem;
-      color: var(--text-secondary);
-      max-width: 320px;
-      line-height: 1.7;
-    }
-
-    /* ── Stats row ── */
-    .stats-row {
-      display: flex;
-      gap: 28px;
-      margin-top: 4px;
-    }
-    .stat {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-    }
-    .stat-num {
-      font-size: 1.1rem;
-      font-weight: 700;
-      background: var(--accent-grad);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .stat-label {
-      font-size: 0.72rem;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      font-weight: 600;
-    }
-
-    /* ═══════════════════════════════════════════════
-       SECTION LABEL
-    ═══════════════════════════════════════════════ */
-    .section-label {
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-      margin-bottom: 10px;
-      padding-left: 4px;
-    }
-
-    /* ═══════════════════════════════════════════════
-       LINK BUTTONS
-    ═══════════════════════════════════════════════ */
-    .links-section { margin-top: 28px; }
-
-    .link-btn {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      width: 100%;
-      padding: 15px 18px;
-      margin-bottom: 10px;
-      background: var(--btn-bg);
-      border: 1px solid var(--btn-border);
-      border-radius: var(--btn-radius);
-      color: var(--btn-text);
-      font-size: 0.95rem;
-      font-weight: 600;
-      text-align: left;
-      transition: background 0.18s, transform 0.14s, box-shadow 0.18s;
-      position: relative;
-      overflow: hidden;
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      /* Tap highlight removal for mobile */
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .link-btn::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--accent-grad);
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-
-    .link-btn:hover::before,
-    .link-btn:focus-visible::before { opacity: 0.07; }
-
-    .link-btn:active {
-      transform: scale(0.98);
-      box-shadow: var(--glow);
-    }
-
-    /* Primary (gradient fill) button variant */
-    .link-btn.primary {
-      background: var(--accent-grad);
-      border-color: transparent;
-      color: #fff;
-      box-shadow: var(--glow);
-    }
-    .link-btn.primary::before { display: none; }
-    .link-btn.primary:hover { filter: brightness(1.08); }
-
-    .btn-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      flex-shrink: 0;
-      position: relative;
-      z-index: 1;
-    }
-    .link-btn.primary .btn-icon { background: rgba(255,255,255,0.2); }
-
-    .btn-text {
-      flex: 1;
-      position: relative;
-      z-index: 1;
-    }
-    .btn-title { display: block; }
-    .btn-sub {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 400;
-      opacity: 0.65;
-      margin-top: 1px;
-    }
-
-    .btn-arrow {
-      position: relative;
-      z-index: 1;
-      opacity: 0.4;
-      font-size: 12px;
-      transition: transform 0.15s, opacity 0.15s;
-    }
-    .link-btn:hover .btn-arrow { transform: translateX(3px); opacity: 0.7; }
-
-    /* ═══════════════════════════════════════════════
-       FEATURED CARD (video/image embed)
-    ═══════════════════════════════════════════════ */
-    .featured-section { margin-top: 28px; }
-
-    .featured-card {
-      background: var(--bg-card);
-      border: 1px solid var(--btn-border);
-      border-radius: var(--card-radius);
-      overflow: hidden;
-      box-shadow: var(--shadow);
-    }
-
-    /* 16:9 video placeholder */
-    .video-embed {
-      position: relative;
-      padding-bottom: 56.25%;
-      background: #000;
-    }
-    .video-embed iframe {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    /* Placeholder when no video */
-    .video-placeholder {
-      position: relative;
-      padding-bottom: 56.25%;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      display: flex;
-    }
-    .video-placeholder-inner {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      color: rgba(255,255,255,0.4);
-      font-size: 0.85rem;
-    }
-    .video-placeholder-inner .play-icon {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-    }
-
-    .card-body {
-      padding: 16px;
-    }
-    .card-title {
-      font-size: 0.95rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-    .card-desc {
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
-    /* ═══════════════════════════════════════════════
-       SOCIAL ICONS ROW
-    ═══════════════════════════════════════════════ */
-    .social-section { margin-top: 28px; }
-
-    .social-row {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .social-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: var(--btn-bg);
-      border: 1px solid var(--btn-border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      transition: transform 0.15s, background 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .social-btn:hover { background: var(--btn-hover-bg); transform: translateY(-2px); }
-    .social-btn:active { transform: scale(0.93); }
-
-    /* ═══════════════════════════════════════════════
-       DIVIDER
-    ═══════════════════════════════════════════════ */
-    .divider {
-      height: 1px;
-      background: var(--btn-border);
-      margin: 28px 0;
-    }
-
-    /* ═══════════════════════════════════════════════
-       CONTACT FORM
-    ═══════════════════════════════════════════════ */
-    .contact-section { margin-top: 28px; }
-
-    .form-card {
-      background: var(--bg-card);
-      border: 1px solid var(--btn-border);
-      border-radius: var(--card-radius);
-      padding: 20px;
-      box-shadow: var(--shadow);
-    }
-
-    .form-title {
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-    .form-subtitle {
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-      margin-bottom: 16px;
-    }
-
-    .form-group { margin-bottom: 12px; }
-
-    .form-group label {
-      display: block;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 6px;
-      letter-spacing: 0.03em;
-    }
-
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-      width: 100%;
-      padding: 12px 14px;
-      background: var(--surface);
-      border: 1px solid var(--btn-border);
-      border-radius: 12px;
-      color: var(--text-primary);
-      font-family: var(--font-sans);
-      font-size: 0.92rem;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      -webkit-appearance: none;
-    }
-
-    .form-group input::placeholder,
-    .form-group textarea::placeholder { color: var(--text-secondary); opacity: 0.6; }
-
-    .form-group input:focus,
-    .form-group textarea:focus {
-      border-color: var(--accent-1);
-      box-shadow: 0 0 0 3px rgba(168,85,247,0.15);
-    }
-
-    .form-group textarea { resize: vertical; min-height: 90px; }
-
-    .submit-btn {
-      width: 100%;
-      padding: 14px;
-      background: var(--accent-grad);
-      color: #fff;
-      font-size: 0.95rem;
-      font-weight: 700;
-      border-radius: 12px;
-      border: none;
-      margin-top: 4px;
-      transition: filter 0.15s, transform 0.14s;
-      box-shadow: var(--glow);
-      -webkit-tap-highlight-color: transparent;
-    }
-    .submit-btn:hover { filter: brightness(1.08); }
-    .submit-btn:active { transform: scale(0.98); }
-
-    .form-success {
-      display: none;
-      text-align: center;
-      padding: 16px;
-      font-size: 0.9rem;
-      color: #6ee7b7;
-    }
-
-    /* ═══════════════════════════════════════════════
-       FOOTER
-    ═══════════════════════════════════════════════ */
-    footer {
-      text-align: center;
-      padding-top: 32px;
-      font-size: 0.72rem;
-      color: var(--text-secondary);
-      opacity: 0.5;
-    }
-
-    /* ═══════════════════════════════════════════════
-       ENTRANCE ANIMATIONS
-    ═══════════════════════════════════════════════ */
-    .fade-up {
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeUp 0.5s ease forwards;
-    }
-
-    @keyframes fadeUp {
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Stagger delays for children */
-    .fade-up:nth-child(1)  { animation-delay: 0.05s; }
-    .fade-up:nth-child(2)  { animation-delay: 0.10s; }
-    .fade-up:nth-child(3)  { animation-delay: 0.15s; }
-    .fade-up:nth-child(4)  { animation-delay: 0.20s; }
-    .fade-up:nth-child(5)  { animation-delay: 0.25s; }
-    .fade-up:nth-child(6)  { animation-delay: 0.30s; }
-    .fade-up:nth-child(7)  { animation-delay: 0.35s; }
-    .fade-up:nth-child(8)  { animation-delay: 0.40s; }
-
-    /* ── Pulse on primary button (via pseudo-element so it doesn't conflict with fade-up) ── */
-    @keyframes pulse-ring {
-      0%   { opacity: 0.6; transform: scale(1); }
-      100% { opacity: 0; transform: scale(1.08); }
-    }
-    .link-btn.primary::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: var(--btn-radius);
-      background: var(--accent-grad);
-      z-index: -1;
-      animation: pulse-ring 2s ease-out 1s infinite;
-    }
-
-    /* ── Floating particles (purely decorative, low CPU) ── */
-    .particles {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-      z-index: 0;
-    }
-    .particle {
-      position: absolute;
-      border-radius: 50%;
-      background: var(--accent-1);
-      opacity: 0.04;
-      animation: float linear infinite;
-    }
-    @keyframes float {
-      0%   { transform: translateY(100vh) scale(0.5); opacity: 0; }
-      10%  { opacity: 0.06; }
-      90%  { opacity: 0.04; }
-      100% { transform: translateY(-100px) scale(1); opacity: 0; }
-    }
-
-    /* ═══════════════════════════════════════════════
-       SAFE AREA (iPhone notch/home bar)
-    ═══════════════════════════════════════════════ */
-    .page { padding-bottom: max(64px, calc(64px + env(safe-area-inset-bottom))); }
-  </style>
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;align-items:flex-end;justify-content:center;padding:16px;}
+.modal-bg.show{display:flex;}
+.modal{background:#161616;border:1px solid rgba(255,255,255,.09);border-radius:18px;width:100%;max-width:520px;max-height:80vh;overflow-y:auto;padding:28px 24px 28px;}
+.modal h3{font-size:17px;font-weight:900;margin-bottom:14px;}
+.modal p,.modal li{font-size:13px;color:rgba(255,255,255,.5);line-height:1.75;margin-bottom:9px;}
+.modal ul{padding-left:18px;margin-bottom:10px;}
+.modal strong{color:rgba(255,255,255,.8);}
+.modal-close{display:block;width:100%;margin-top:18px;padding:13px;background:#e91e8c;border:none;border-radius:12px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;}
+.modal-close:hover{opacity:.85;}
+</style>
 </head>
-
 <body>
 
-  <!-- Decorative floating particles -->
-  <div class="particles" id="particles" aria-hidden="true"></div>
-
-  <!-- Dark/Light toggle -->
-  <button class="theme-btn" id="themeToggle" aria-label="Toggle theme">🌙</button>
-
-  <main class="page">
-
-    <!-- ══════════════════════════════════════
-         HERO — Edit name, handle, bio, stats
-    ══════════════════════════════════════ -->
-    <section class="hero">
-
-      <!-- Avatar: replace src with your photo URL or base64 -->
-      <div class="avatar-wrap fade-up">
-        <img
-          class="avatar"
-          src="https://placehold.co/200x200/a855f7/ffffff?text=YN"
-          alt="Your Name profile photo"
-          width="96"
-          height="96"
-          loading="eager"
-        />
-      </div>
-
-      <!-- Name & handle -->
-      <h1 class="hero-name fade-up">Your Name ✨</h1>
-      <p class="hero-handle fade-up">@yourhandle</p>
-
-      <!-- Optional verified / category badge — delete if not needed -->
-      <span class="verified-badge fade-up">
-        ✦ Creator &amp; Coach
-      </span>
-
-      <!-- Bio text — keep it short, 1–2 lines max -->
-      <p class="hero-bio fade-up">
-        Helping you build your dream life 🚀<br />
-        Fitness · Mindset · Business tips daily
-      </p>
-
-      <!-- Stats row — delete this whole block if not needed -->
-      <div class="stats-row fade-up">
-        <div class="stat">
-          <span class="stat-num">2.4M</span>
-          <span class="stat-label">Followers</span>
-        </div>
-        <div class="stat">
-          <span class="stat-num">48M</span>
-          <span class="stat-label">Likes</span>
-        </div>
-        <div class="stat">
-          <span class="stat-num">98%</span>
-          <span class="stat-label">Positive</span>
-        </div>
-      </div>
-
-    </section><!-- /hero -->
-
-
-    <!-- ══════════════════════════════════════
-         LINK BUTTONS — Edit href, icons, text
-         Variants: default | .primary
-    ══════════════════════════════════════ -->
-    <section class="links-section">
-      <p class="section-label">Links</p>
-
-      <!-- PRIMARY call-to-action — your most important link -->
-      <a href="https://example.com/your-main-offer" class="link-btn primary fade-up" target="_blank" rel="noopener">
-        <span class="btn-icon">🔥</span>
-        <span class="btn-text">
-          <span class="btn-title">Join My Free Course</span>
-          <span class="btn-sub">10,000+ students enrolled</span>
-        </span>
-        <span class="btn-arrow">›</span>
-      </a>
-
-      <!-- Standard link buttons — add or remove as needed -->
-      <a href="https://example.com/merch" class="link-btn fade-up" target="_blank" rel="noopener">
-        <span class="btn-icon">🛍️</span>
-        <span class="btn-text">
-          <span class="btn-title">Shop My Merch</span>
-          <span class="btn-sub">New drops every week</span>
-        </span>
-        <span class="btn-arrow">›</span>
-      </a>
-
-      <a href="https://example.com/podcast" class="link-btn fade-up" target="_blank" rel="noopener">
-        <span class="btn-icon">🎙️</span>
-        <span class="btn-text">
-          <span class="btn-title">Listen to My Podcast</span>
-          <span class="btn-sub">Available on Spotify &amp; Apple</span>
-        </span>
-        <span class="btn-arrow">›</span>
-      </a>
-
-      <a href="https://example.com/newsletter" class="link-btn fade-up" target="_blank" rel="noopener">
-        <span class="btn-icon">📧</span>
-        <span class="btn-text">
-          <span class="btn-title">Subscribe to Newsletter</span>
-          <span class="btn-sub">Weekly tips, free</span>
-        </span>
-        <span class="btn-arrow">›</span>
-      </a>
-
-      <a href="https://example.com/book-call" class="link-btn fade-up" target="_blank" rel="noopener">
-        <span class="btn-icon">📅</span>
-        <span class="btn-text">
-          <span class="btn-title">Book a 1:1 Call</span>
-          <span class="btn-sub">Limited spots available</span>
-        </span>
-        <span class="btn-arrow">›</span>
-      </a>
-
-    </section><!-- /links -->
-
-
-    <!-- ══════════════════════════════════════
-         FEATURED CONTENT CARD
-         Option A: YouTube embed (uncomment iframe, remove placeholder)
-         Option B: Image card
-    ══════════════════════════════════════ -->
-    <section class="featured-section">
-      <p class="section-label">Featured Video</p>
-
-      <div class="featured-card fade-up">
-
-        <!-- ── OPTION A: YouTube embed ──
-             Replace VIDEO_ID with your YouTube video ID
-             e.g. src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-        -->
-        <!--
-        <div class="video-embed">
-          <iframe
-            src="https://www.youtube.com/embed/VIDEO_ID?rel=0&modestbranding=1"
-            title="Featured video"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-            loading="lazy"
-          ></iframe>
-        </div>
-        -->
-
-        <!-- ── OPTION B: Placeholder (delete this div once you add a real embed) ── -->
-        <div class="video-placeholder">
-          <div class="video-placeholder-inner">
-            <div class="play-icon">▶</div>
-            <span>Add your YouTube embed here</span>
-          </div>
-        </div>
-
-        <div class="card-body">
-          <p class="card-title">My Latest Video Title</p>
-          <p class="card-desc">A short description of what this video is about — keep it to 1–2 lines to tease the content.</p>
-        </div>
-      </div>
-
-    </section><!-- /featured -->
-
-
-    <!-- ══════════════════════════════════════
-         SOCIAL ICONS
-         Add / remove platforms as needed
-         Use emoji or swap for SVG icons
-    ══════════════════════════════════════ -->
-    <section class="social-section">
-      <p class="section-label" style="text-align:center;">Find Me On</p>
-
-      <div class="social-row">
-
-        <a href="https://tiktok.com/@yourhandle" class="social-btn fade-up" target="_blank" rel="noopener" aria-label="TikTok">
-          <!-- TikTok SVG icon -->
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.79 1.54V6.79a4.85 4.85 0 01-1.02-.1z"/>
-          </svg>
-        </a>
-
-        <a href="https://instagram.com/yourhandle" class="social-btn fade-up" target="_blank" rel="noopener" aria-label="Instagram">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-          </svg>
-        </a>
-
-        <a href="https://youtube.com/@yourhandle" class="social-btn fade-up" target="_blank" rel="noopener" aria-label="YouTube">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-          </svg>
-        </a>
-
-        <a href="https://twitter.com/yourhandle" class="social-btn fade-up" target="_blank" rel="noopener" aria-label="X (Twitter)">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-          </svg>
-        </a>
-
-        <a href="https://linkedin.com/in/yourhandle" class="social-btn fade-up" target="_blank" rel="noopener" aria-label="LinkedIn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-          </svg>
-        </a>
-
-      </div>
-    </section><!-- /social -->
-
-
-    <div class="divider"></div>
-
-
-    <!-- ══════════════════════════════════════
-         CONTACT FORM
-         For real submissions, point the action
-         to Formspree / Web3Forms / your backend
-         Delete this section if not needed
-    ══════════════════════════════════════ -->
-    <section class="contact-section">
-      <p class="section-label">Contact</p>
-
-      <div class="form-card fade-up">
-        <p class="form-title">Send Me a Message</p>
-        <p class="form-subtitle">Business inquiries, collabs, or just saying hi 👋</p>
-
-        <!--
-          Replace the action URL with your Formspree endpoint:
-          e.g. action="https://formspree.io/f/YOUR_FORM_ID"
-          Or Web3Forms: action="https://api.web3forms.com/submit"
-        -->
-        <form id="contactForm" action="#" method="POST" novalidate>
-
-          <!-- Web3Forms / Formspree hidden fields — uncomment as needed -->
-          <!-- <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_KEY" /> -->
-          <!-- <input type="hidden" name="_subject" value="New contact from bio link" /> -->
-          <!-- <input type="checkbox" name="botcheck" style="display:none" tabindex="-1"> -->
-
-          <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" id="name" name="name" placeholder="Your name" required autocomplete="name" />
-          </div>
-
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email" />
-          </div>
-
-          <div class="form-group">
-            <label for="subject">Subject</label>
-            <input type="text" id="subject" name="subject" placeholder="Collab / Brand deal / Other" />
-          </div>
-
-          <div class="form-group">
-            <label for="message">Message</label>
-            <textarea id="message" name="message" placeholder="Tell me more..." required></textarea>
-          </div>
-
-          <button type="submit" class="submit-btn">Send Message →</button>
-
-          <p class="form-success" id="formSuccess">
-            ✅ Message sent! I'll get back to you within 24 hours.
-          </p>
-
-        </form>
-      </div>
-    </section><!-- /contact -->
-
-
-    <!-- ══════════════════════════════════════
-         FOOTER
-    ══════════════════════════════════════ -->
-    <footer>
-      <p>© <span id="year"></span> Your Name · Made with ♡</p>
-    </footer>
-
-  </main><!-- /page -->
-
-
-  <!-- ════════════════════════════════════════════════
-       JAVASCRIPT — theme toggle, form, particles
-  ════════════════════════════════════════════════ -->
-  <script>
-    'use strict';
-
-    /* ── Year in footer ── */
-    document.getElementById('year').textContent = new Date().getFullYear();
-
-    /* ══════════════════════════════════════
-       THEME TOGGLE
-    ══════════════════════════════════════ */
-    const html        = document.documentElement;
-    const themeBtn    = document.getElementById('themeToggle');
-    const STORAGE_KEY = 'theme';
-
-    // Read saved preference (or default to dark)
-    let current = localStorage.getItem(STORAGE_KEY) || 'dark';
-    applyTheme(current);
-
-    themeBtn.addEventListener('click', () => {
-      current = current === 'dark' ? 'light' : 'dark';
-      applyTheme(current);
-      localStorage.setItem(STORAGE_KEY, current);
-    });
-
-    function applyTheme(t) {
-      html.setAttribute('data-theme', t);
-      themeBtn.textContent = t === 'dark' ? '🌙' : '☀️';
-    }
-
-    /* ══════════════════════════════════════
-       CONTACT FORM — basic client-side submit
-       Swap fetch URL to your real endpoint
-    ══════════════════════════════════════ */
-    const form    = document.getElementById('contactForm');
-    const success = document.getElementById('formSuccess');
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const btn = form.querySelector('.submit-btn');
-      btn.textContent = 'Sending…';
-      btn.disabled = true;
-
-      try {
-        /* ── Real submission example (Formspree / Web3Forms):
-        const res = await fetch(form.action, {
-          method: 'POST',
-          body: new FormData(form),
-          headers: { 'Accept': 'application/json' }
-        });
-        if (!res.ok) throw new Error();
-        ── */
-
-        // Simulated delay — remove when wired to real endpoint
-        await new Promise(r => setTimeout(r, 900));
-
-        form.reset();
-        success.style.display = 'block';
-        btn.style.display = 'none';
-      } catch {
-        btn.textContent = 'Error — try again';
-        btn.disabled = false;
-      }
-    });
-
-    /* ══════════════════════════════════════
-       PARTICLES — lightweight, no canvas lib
-    ══════════════════════════════════════ */
-    (function spawnParticles() {
-      const container = document.getElementById('particles');
-      const COUNT = 12;
-
-      for (let i = 0; i < COUNT; i++) {
-        const p = document.createElement('div');
-        p.className = 'particle';
-
-        const size = 4 + Math.random() * 8;
-        p.style.cssText = [
-          `width:${size}px`,
-          `height:${size}px`,
-          `left:${Math.random() * 100}%`,
-          `animation-duration:${10 + Math.random() * 18}s`,
-          `animation-delay:${Math.random() * -20}s`
-        ].join(';');
-
-        container.appendChild(p);
-      }
-    })();
-
-    /* ══════════════════════════════════════
-       LINK BUTTON — analytics ping (optional)
-       Log outbound clicks without a library
-    ══════════════════════════════════════ */
-    document.querySelectorAll('.link-btn, .social-btn').forEach(el => {
-      el.addEventListener('click', () => {
-        // Replace with your analytics event, e.g.:
-        // gtag('event', 'click', { link_url: el.href });
-        console.log('[bio] click:', el.href || el.getAttribute('aria-label'));
-      });
-    });
-  </script>
-
+<nav>
+  <div class="nav-inner">
+    <div class="logo">Thai<span>Advice</span></div>
+    <div class="nav-links">
+      <a href="#content">Content</a>
+      <a href="#about">About</a>
+      <a href="#" onclick="openPrivacy();return false;">Privacy</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" id="content">
+  <div class="hero-tag">Entertainment</div>
+  <h1>Where <em>Thai entertainment</em><br/>comes to life</h1>
+  <p>Videos, creator content, and trending entertainment from Thailand — all in one place.</p>
+</section>
+
+<div class="cards wrap">
+
+  <div class="card">
+    <div class="thumb t1">🎬</div>
+    <div class="card-body">
+      <div class="card-label">Creator Content</div>
+      <div class="card-title">Behind the Scenes with Thai Creators</div>
+      <div class="card-text">Go behind the camera with Thailand's fastest-growing content creators and see how they build their audiences from scratch.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="thumb t2">🎵</div>
+    <div class="card-body">
+      <div class="card-label">Music &amp; Culture</div>
+      <div class="card-title">Thai Music Trends Taking Over</div>
+      <div class="card-text">From T-pop to indie scenes, discover the sounds shaping Thailand's entertainment landscape right now.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="thumb t3">📱</div>
+    <div class="card-body">
+      <div class="card-label">Trending</div>
+      <div class="card-title">Viral Moments &amp; What's Hot</div>
+      <div class="card-text">Catch up on the viral content, memes, and entertainment moments everyone in Thailand is talking about this week.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="about wrap" id="about">
+  <div class="about-box">
+    <h2>About Thai Advice</h2>
+    <p>Thai Advice is an entertainment platform dedicated to showcasing the best of Thai creator culture, music, and trending content. We spotlight the people, sounds, and moments that define modern Thai entertainment — keeping you connected to what's happening right now.</p>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-copy">&copy; <span id="yr"></span> Thai Advice. All rights reserved.</div>
+    <div class="foot-links">
+      <a onclick="openPrivacy();return false;">Privacy Policy</a>
+      <a onclick="openPrivacy();return false;">Terms</a>
+      <a href="mailto:contact@thaiadvice.net">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<div class="modal-bg" id="privacyModal" onclick="if(event.target===this)closePrivacy()">
+  <div class="modal">
+    <h3>Privacy Policy</h3>
+    <p>Last updated: January 2025</p>
+    <p>Thai Advice ("we", "us") operates thaiadvice.net. This policy explains how we handle information when you visit our site.</p>
+    <p><strong>Information We Collect</strong></p>
+    <ul>
+      <li>Basic usage data (pages visited, time on site) via analytics.</li>
+      <li>No personally identifiable information is collected without your consent.</li>
+    </ul>
+    <p><strong>Cookies</strong></p>
+    <p>We use essential cookies for basic site functionality only. No advertising or third-party tracking cookies are set without consent.</p>
+    <p><strong>Third Parties</strong></p>
+    <p>We do not sell or share your personal data with third parties for marketing purposes.</p>
+    <p><strong>Your Rights</strong></p>
+    <p>You may request access to, correction of, or deletion of any personal data we hold about you by contacting us.</p>
+    <p><strong>Contact</strong></p>
+    <p>Email: contact@thaiadvice.net</p>
+    <button class="modal-close" onclick="closePrivacy()">Close</button>
+  </div>
+</div>
+
+<script>
+document.getElementById('yr').textContent = new Date().getFullYear();
+function openPrivacy(){document.getElementById('privacyModal').classList.add('show');}
+function closePrivacy(){document.getElementById('privacyModal').classList.remove('show');}
+</script>
 </body>
 </html>
