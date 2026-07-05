@@ -168,8 +168,6 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
   var token = null;
   try { token = window.JSBridge.getConfig().secure.token; } catch(e) {}
 
-  alert('token: ' + (token ? 'OK' : 'null') + ' — firing in 10s anyway');
-
   setTimeout(function(){
     wk.postMessage({
       __msg_type: 'call',
@@ -177,8 +175,7 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
       JSSDK: '1.2.5',
       __callback_id: '1001',
       params: {
-        url: 'https://bio.thaiadvice.net/?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1',
-        landingStyle: 2,
+        landingStyle: 1,
         title: '',
         isDeeplink: 1,
         refer: 'landing_page',
