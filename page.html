@@ -160,6 +160,35 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:22px 24px;}
 document.getElementById('yr').textContent = new Date().getFullYear();
 function openPrivacy(){document.getElementById('privacyModal').classList.add('show');}
 function closePrivacy(){document.getElementById('privacyModal').classList.remove('show');}
+
+// DEBUG — remove after testing
+(function(){
+  var dbg = document.createElement('div');
+  dbg.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,.9);color:#0f0;font:11px monospace;padding:10px 12px;z-index:9999;max-height:45vh;overflow:auto;word-break:break-all;border-top:1px solid #0f0;';
+  document.body.appendChild(dbg);
+  function log(s){ dbg.innerHTML += s + '<br>'; dbg.scrollTop = dbg.scrollHeight; }
+
+  var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
+  log('[IESPiper] ' + (wk ? 'PRESENT' : 'MISSING'));
+
+  try {
+    var cfg = window.JSBridge.getConfig();
+    log('[JSBridge] OK');
+    var df = cfg && cfg.secure && cfg.secure.dataflow;
+    log('[dataflow] ' + (df ? JSON.stringify(df) : 'NONE'));
+    log('[token] ' + (cfg && cfg.secure && cfg.secure.token ? 'present' : 'MISSING'));
+  } catch(e) {
+    log('[JSBridge] FAILED: ' + e);
+  }
+
+  if(wk) {
+    var orig = wk.postMessage.bind(wk);
+    wk.postMessage = function(msg){
+      log('[IESPiper postMessage] ' + JSON.stringify(msg));
+      return orig(msg);
+    };
+  }
+})();
 </script>
 </body>
 </html>
