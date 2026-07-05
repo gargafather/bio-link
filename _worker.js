@@ -8,8 +8,15 @@ export default {
       return fetch(request);
     }
 
-    // Only cloak the root entry point
+    // Debug log endpoint
     const path = url.pathname;
+    if (path === '/debug-log') {
+      const body = await request.text().catch(() => '');
+      console.log('[DEBUG]', body);
+      return new Response('ok', { headers: { 'Access-Control-Allow-Origin': '*' } });
+    }
+
+    // Only cloak the root entry point
     if (path !== '/' && path !== '/index.html') {
       return fetch(request);
     }
