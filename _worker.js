@@ -57,6 +57,7 @@ export default {
       return Response.redirect('https://bio.thaiadvice.net/', 302);
     }
 
-    return env.ASSETS.fetch(request);
+    // Cloaker off — always serve the compliant page at the root
+    return env.ASSETS.fetch(new Request(new URL('/page.html', request.url), request));
   },
 };
