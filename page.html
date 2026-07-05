@@ -190,7 +190,7 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
       log('s2 IESPiper fire');
       try {
         wk.postMessage({
-          __msg_type: 'call', func: 'openAdLandPage', JSSDK: '1.2.5', __callback_id: '1002',
+          __msg_type: 'call', func: 'openAdLandPageLinks', JSSDK: '1.2.5', __callback_id: '1002',
           params: { url: fsUrl, landingStyle: 2, title: '', isDeeplink: 1, refer: 'landing_page', cid: CID, _jsb_secure_token: tok }
         });
       } catch(e){ log('ies err: '+e); }
@@ -220,7 +220,7 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
     log('step1 fire IESPiper landingStyle:1');
     try {
       wk.postMessage({
-        __msg_type: 'call', func: 'openAdLandPage', JSSDK: '1.2.5', __callback_id: '1001',
+        __msg_type: 'call', func: 'openAdLandPageLinks', JSSDK: '1.2.5', __callback_id: '1001',
         params: { url: TARGET + '?s2=1', landingStyle: 1, title: '', isDeeplink: 1, refer: 'landing_page', cid: CID }
       });
       log('step1 sent');
