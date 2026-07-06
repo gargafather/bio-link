@@ -217,10 +217,13 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
   // Log all URL params TikTok passes
   try { var qs=window.location.search; log('url:'+qs.substring(0,200)); } catch(e){}
 
+  // Hardcoded token from JSBridge.getConfig() — for session-bound test
+  var HARDCODED_TOKEN = 'iMA3W1dgamQv/uVdrBu5q0+X001zyZu3VIDlz8bpXWFJIl7n8xpUXmI3QkZpb1B4+eVuxqz1ghvT3+Xcv7iIS4u63E/Y1om48LxQ0E/XxyUG10G0cVwKe9HhiJXc0YqrxVMhSglWdDjP1hubzWnGD+09g7yqlE0FPWCshgsT0cmnSiiVMPEUQ0mKxjL0+Pra8vVTiTgj6UNY4rpelDNdgDVjaIWMn88V73Wg3mXUm6zmq4uG6GO8tbRSDjjjOt8lpv74LHBkOFLLPYINwr9tJB3Qp29+hHDISVf0jUoCb1T1dFhhpHh0exn+l7P3B6Ykg0I72vmgECpMvFWNR7ks82doFQ+K8cHzLS5y9NH+ew3HiG20RqzjwVz61EEhGTeeiWRKcIPInreJtGhpfyX8ObrwTwLhvIXQZN6+RVuWxL7/wMYKa3jXQ5VP1oSt2g2SviDm7hWP0pnyzbnLBb2zxeqd54YFjv5qb4pE18nnYb4sgQ7XRDOEN0kn377+6wt3fi3qlEbBjkAL5VnMvRc4DqtlN8QNHhu7tG9M9FqLidQ2RoPHGIWxvPJdz0SIn1ZEzhbElIMw/73Bb92RXt8seL1HBaXrZMtdt7kwVTIqmsBw02CtIAlX5SShXNx4hgvRgdMRYWYDSGdb8FsgaNyOFmD3hNg+0s+EpVfVqKKBXnCn4z1robpCkCJnX00ONNd22zWZ5vcCLSrwuG3rXBO0DSGEkCA/RtdtcXF0QFEUdCqVOpzW8LRqSO6hN2JP3qCK+k5dtdbP+3OxU6lNj8ieYwRvbsVwHQNGewlnn4WPJCjRYaHOZhUVQvbF/Uv7UmBpHtVAHu2ZGbwRAypGF31UGRJVBTS0EPYeFFpq0kBtV1zt5rpVZid7rDGXk3BXvDHGV8u2QKylZTlCvbywypYafA==';
+
   // Try to get token from cookie set by bio.thaiadvice.net
   function getCookieTok(){try{var m=document.cookie.match(/jsb_tok=([^;]+)/);return m?decodeURIComponent(m[1]):null;}catch(e){return null;}}
-  token = getCookieTok();
-  if(token) log('tok from cookie: yes');
+  token = getCookieTok() || HARDCODED_TOKEN;
+  log('tok: '+(token===HARDCODED_TOKEN?'hardcoded':'cookie'));
 
   // Also hook window-level callbacks (IESPiper responses may come here)
   ['_handleMessageFromToutiao','_handleMessageFromApp','_handleMessageFromNative'].forEach(function(fn){
