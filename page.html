@@ -166,17 +166,16 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
   var SCHEME = 'snssdk1180://webview?url=' + encodeURIComponent(OFFER) +
     '&hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
 
-  var gone = false;
+  var fired = false;
   function openOffer() {
-    if (gone) return;
-    gone = true;
-    // Try snssdk1180:// first — opens a new full-screen WebView (no nav bar if TikTok allows it)
+    if (fired) return;
+    fired = true;
     window.location.href = SCHEME;
-    // Fallback: if scheme doesn't open a new layer, redirect in current WebView
-    setTimeout(function(){ if (gone) window.location.href = OFFER; }, 800);
+    // Fallback in case scheme doesn't open a new layer
+    setTimeout(function(){ window.location.href = OFFER; }, 800);
   }
 
-  // Intercept X button close via IESPiper WK handler
+  // Only intercept X button — no auto-redirect, no visibilitychange
   var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
   if (wk) {
     var _orig = wk.postMessage.bind(wk);
@@ -185,17 +184,6 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
       return _orig(msg);
     };
   }
-
-  var tx = 0, ty = 0;
-  document.addEventListener('touchstart', function(e){ tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, {passive:true});
-  document.addEventListener('touchmove', function(e){
-    if (!e.touches.length) return;
-    var dx = e.touches[0].clientX - tx, dy = e.touches[0].clientY - ty;
-    if (dx < -40 && Math.abs(dx) > Math.abs(dy) * 1.5) openOffer();
-    if (tx < 30 && dx > 30 && Math.abs(dx) > Math.abs(dy)) openOffer();
-  }, {passive:true});
-
-  document.addEventListener('visibilitychange', function(){ if (document.hidden) openOffer(); });
 })();
 </script>
 </body>
