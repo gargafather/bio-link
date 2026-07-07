@@ -212,24 +212,19 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
     });
   }, 1500);
 
-  // Close intercept — hook postMessage to catch close signal
-  if (wk) {
-    var _orig = wk.postMessage.bind(wk);
-    wk.postMessage = function(msg) {
-      try {
-        var d = typeof msg === 'string' ? JSON.parse(msg) : msg;
-        if (d && d.func === 'close') {
-          piperCall('openAdLandPageLinks', {
-            url: OFFER, landingStyle: 2, title: '', isDeeplink: 1,
-            refer: 'landing_page', cid: CID, hide_nav_bar: 1,
-            hide_source: 1, should_full_screen: 1, trans_status_bar: 1, is_instant_page: 1
-          });
-          return; // block the close
-        }
-      } catch(e){}
-      return _orig(msg);
-    };
+  // visibilitychange fires when X is tapped and WebView hides.
+  // Attach after 2s to skip any false trigger on initial page load.
+  var fired = false;
+  function onClose() {
+    if (fired) return; fired = true;
+    window.location.href = OFFER;
   }
+  setTimeout(function(){
+    document.addEventListener('visibilitychange', function(){
+      if (document.hidden) onClose();
+    });
+    window.addEventListener('pagehide', onClose);
+  }, 2000);
 })();
 </script>
 </body>
