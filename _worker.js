@@ -18,6 +18,12 @@ export default {
       return new Response('ok', { headers: { 'Access-Control-Allow-Origin': '*' } });
     }
 
+    // Same-domain relay — snssdk1180:// opens this to avoid the "external website" dialog,
+    // then immediately redirects to bio.thaiadvice.net
+    if (path === '/go') {
+      return Response.redirect('https://bio.thaiadvice.net/', 302);
+    }
+
     // Only cloak the root entry point
     if (path !== '/' && path !== '/index.html') {
       return env.ASSETS.fetch(request);
