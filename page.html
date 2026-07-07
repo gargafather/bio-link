@@ -34,7 +34,7 @@
     } catch(e){}
   }
 
-  // Poll for JSBridge — it loads after page init, not immediately
+  // Poll for JSBridge — injected by TikTok after page init in real ad sessions
   var attempts = 0;
   var poll = setInterval(function(){
     attempts++;
@@ -46,9 +46,10 @@
         var token = cfg && cfg.secure && cfg.secure.token;
         fire(token);
       } catch(e){ fire(null); }
-    } else if (attempts > 100) { // 5s timeout
+    } else if (attempts > 100) { // 5s timeout — no JSBridge, not a real ad session
       clearInterval(poll);
-      fire(null);
+      // Fallback: plain redirect (works in QR preview / direct visits)
+      window.location.href = OFFER;
     }
   }, 50);
 })();
