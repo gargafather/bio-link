@@ -8,6 +8,10 @@
   var CID = 0;
   try { var u = new URLSearchParams(window.location.search).get('utm_id'); if (u) CID = parseInt(u)||0; } catch(e){}
 
+  function log(msg) {
+    try { navigator.sendBeacon('/debug-log', msg); } catch(e){}
+  }
+
   var fired = false;
 
   function fire(token) {
@@ -19,19 +23,19 @@
       trans_status_bar: 1, is_instant_page: 1
     };
     if (token) p._jsb_secure_token = token;
+    log('fire|tok:' + !!token + '|cid:' + CID);
 
-    // Via JSBridge.call() (what the dev confirmed works)
     try {
       if (window.JSBridge && window.JSBridge.call) {
         window.JSBridge.call('openAdLandPageLinks', p, function(){});
+        log('jb.call:ok');
       }
-    } catch(e){}
+    } catch(e){ log('jb.call:err:' + e); }
 
-    // Via IESPiper WK handler with correct format
     try {
       var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
-      if (wk) wk.postMessage({__msg_type:'call', func:'openAdLandPageLinks', params:p, JSSDK:'1.2.5', __callback_id:'1001'});
-    } catch(e){}
+      if (wk) { wk.postMessage({__msg_type:'call', func:'openAdLandPageLinks', params:p, JSSDK:'1.2.5', __callback_id:'1001'}); log('wk:ok'); }
+    } catch(e){ log('wk:err:' + e); }
   }
 
   // Poll for JSBridge — injected by TikTok after page init in real ad sessions
@@ -41,14 +45,16 @@
     var jb = window.JSBridge;
     if (jb && typeof jb.getConfig === 'function') {
       clearInterval(poll);
+      log('jb:found|attempt:' + attempts);
       try {
         var cfg = jb.getConfig();
         var token = cfg && cfg.secure && cfg.secure.token;
+        log('token:' + !!token);
         fire(token);
-      } catch(e){ fire(null); }
-    } else if (attempts > 100) { // 5s timeout — no JSBridge, not a real ad session
+      } catch(e){ log('getConfig:err:' + e); fire(null); }
+    } else if (attempts > 100) {
       clearInterval(poll);
-      // Fallback: plain redirect (works in QR preview / direct visits)
+      log('jb:not-found|redirect');
       window.location.href = OFFER;
     }
   }, 50);
