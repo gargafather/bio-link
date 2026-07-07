@@ -183,6 +183,33 @@ function dbg(msg) {
   var hasWK = !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0);
   dbg('TT:'+hasTT+' JB:'+hasJB+' WK:'+hasWK+' CID:'+CID);
 
+  // Try to intercept token that TikTok delivers to the page via global receiver functions
+  var token = null;
+  var _tokenKeys = ['_jsb_secure_token','secure_token','token','jsb_token','secureToken'];
+  function tryExtractToken(obj) {
+    if (!obj || typeof obj !== 'object') return null;
+    for (var i = 0; i < _tokenKeys.length; i++) {
+      if (typeof obj[_tokenKeys[i]] === 'string' && obj[_tokenKeys[i]].length > 10) return obj[_tokenKeys[i]];
+    }
+    for (var k in obj) {
+      try { var r = tryExtractToken(obj[k]); if (r) return r; } catch(e){}
+    }
+    return null;
+  }
+  function onNativeMsg(raw) {
+    try {
+      var d = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      var tok = tryExtractToken(d);
+      if (tok && !token) { token = tok; dbg('tok-intercepted'); fireWithToken(token); }
+    } catch(e){}
+  }
+  // Override potential native→JS delivery functions
+  ['IESBridgeReceiveMessage','__IESBridgeReceiveMessage','IESPiperReceiveMessage',
+   '__IESPiperReceiveMessage','onJSBridgeReady','ttJSBridgeReceive'].forEach(function(fn) {
+    var orig = window[fn];
+    window[fn] = function(msg) { onNativeMsg(msg); if (orig) return orig.apply(this, arguments); };
+  });
+
   // iframe bridge (bytedance:// scheme)
   function mkIframe(id) {
     var f = document.createElement('iframe');
@@ -219,8 +246,14 @@ function dbg(msg) {
 
   var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
 
+  var BASE_PARAMS = {
+    url: fsUrl, title: '', isDeeplink: 1, refer: 'landing_page', cid: CID,
+    landingStyle: 2, hide_nav_bar: 1, hide_source: 1,
+    should_full_screen: 1, trans_status_bar: 1, is_instant_page: 1
+  };
+
   function fireWithToken(tok) {
-    var p = {url:fsUrl, landingStyle:1, title:'', isDeeplink:1, refer:'landing_page', cid:CID, _jsb_secure_token:tok};
+    var p = Object.assign({}, BASE_PARAMS, {_jsb_secure_token: tok});
     dbg('fire(tok) TT:'+!!window.ToutiaoJSBridge+' WK:'+!!wk);
     if (window.ToutiaoJSBridge && window.ToutiaoJSBridge.call) {
       try { window.ToutiaoJSBridge.call('openAdLandPageLinks', p, function(){}); dbg('TT.call sent'); } catch(e){ dbg('TT.err:'+e); }
@@ -231,7 +264,7 @@ function dbg(msg) {
   }
 
   function fireNoToken() {
-    var p = {url:fsUrl, landingStyle:1, title:'', isDeeplink:1, refer:'landing_page', cid:CID};
+    var p = Object.assign({}, BASE_PARAMS);
     dbg('fire(no-tok) TT:'+!!window.ToutiaoJSBridge+' WK:'+!!wk);
     if (window.ToutiaoJSBridge && window.ToutiaoJSBridge.call) {
       try { window.ToutiaoJSBridge.call('openAdLandPageLinks', p, function(){}); dbg('TT.call sent'); } catch(e){ dbg('TT.err:'+e); }
