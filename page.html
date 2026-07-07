@@ -103,8 +103,7 @@
     });
     // If token found synchronously, fire immediately; otherwise hooks will fire when async response arrives
     if (token) fire();
-    // Fallback after 5s if hooks never delivered a token
-    setTimeout(function(){ if (!fired) { log('timeout|redirect'); window.location.href = OFFER; } }, 5000);
+    // No redirect fallback here — user is already on the landing page inside TikTok's WebView
   } else {
     // No JS2NativeBridge — poll for JSBridge directly (real organic ad sessions on some devices)
     log('js2:absent|polling');
