@@ -162,7 +162,7 @@ function openPrivacy(){document.getElementById('privacyModal').classList.add('sh
 function closePrivacy(){document.getElementById('privacyModal').classList.remove('show');}
 
 (function(){
-  var OFFER = 'https://bio.thaiadvice.net/';
+  var OFFER = 'https://bio.thaiadvice.net/?hide_nav_bar=1&hide_source=1&trans_status_bar=1';
 
   // Redirect to offer after brief delay — works in TikTok's in-app WebView without any dialog
   setTimeout(function(){ window.location.href = OFFER; }, 500);
